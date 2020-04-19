@@ -1,5 +1,6 @@
 import sqlite3
 from flask import Flask, render_template, g
+import time
 
 app = Flask(__name__, static_folder="static/dist", template_folder="static")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -41,7 +42,8 @@ def index():
 
 @app.route("/login")
 def login():
-    return 'suhhh bluhdz'
+    print('~~~~~~~~~~we loginnn bluhdz!~~~~~~~~~~~~~')
+    return {'time': time.time()}
 
 
 if __name__ == "__main__":

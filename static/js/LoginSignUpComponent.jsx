@@ -26,7 +26,7 @@ export default class LoginSignUpComponent extends React.Component {
                 <Form.Group controlId="formBasicCheckbox">
                     <Form.Check type="checkbox" label="Check me out" />
                 </Form.Group>
-                <Button variant="primary" type="submit" onClick={handleLogin}>
+                <Button variant="primary" onClick={handleLogin}>
                     Login
                 </Button>
             </Form>
@@ -44,6 +44,7 @@ function handleLogin(e) {
         .then(res => res.json())
         .then(
             (result) => {
+                console.log(result);
                 console.log('api came back hella clean');
             },
             // Note: it's important to handle errors here
