@@ -1,7 +1,10 @@
 import sqlite3
 from flask import Flask, render_template, g
+import time
 
 app = Flask(__name__, static_folder="static/dist", template_folder="static")
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
 
 
 # Helper function that connects the  the sqlite database
@@ -32,15 +35,16 @@ def close_connection(exception):
 def index():
     results = query_db("SELECT *, holdings.quantity*prices.price as total_value from holdings, prices where holdings.ticker = prices.ticker")
     print(results)
+    print('nels ghey as shiett')
     return render_template("index.html")
 
 
 
 @app.route("/login")
 def login():
-    
-    return 
+    print('~~~~~~~~~~we loginnn bluhdz!~~~~~~~~~~~~~')
+    return {'time': time.time()}
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, threaded=True)
+    app.run(host='0.0.0.0', port=5000, threaded=True, debug=True)
