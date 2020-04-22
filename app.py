@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 import datetime
 app = Flask(__name__, static_folder="static/dist", template_folder="static")
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
