@@ -91,15 +91,11 @@ def login():
 @app.route("/signup", methods=["GET","POST"])
 def signup():
     if request.method == "POST":
-        print("post request received")
-        return "cool post guy"
-    
-    #print("signup post request received")
-    username = "kalvin"
-    password = 'is_a_noob'
-    new_user = pd.DataFrame({'user_name': [username], 'password': [password]})
-    new_user.to_sql(name='user_account', con = db.engine, index=False, if_exists= 'append')
-    return 'signup done'
+        print(request.json['username'])
+        print(request.json['password'])
+        new_user = pd.DataFrame({'user_name': [request.json['username']], 'password': [request.json['password']]})
+        new_user.to_sql(name='user_account', con = db.engine, index=False, if_exists= 'append')
+        return 'signup done'
 
 @app.route("/holdings", methods=["GET","POST"])
 def holdings():

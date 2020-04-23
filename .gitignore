@@ -2,3 +2,4 @@
 static/node_modules/
 venv/
 static/dist/bundle.js
+__pycache__/
