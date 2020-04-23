@@ -121,7 +121,7 @@ def holdings():
         ''',db.engine)
     
     print(user_portfolio)
-    return 'got holdings'
+    return user_portfolio.to_json(orient='index')
     
 @app.route("/prices", methods=["GET","POST"])
 def prices():
