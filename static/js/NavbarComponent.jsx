@@ -16,8 +16,8 @@ export default class NavbarComponent extends React.Component {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
                         <Link to="/">Home</Link>
-                        <Nav.Link href="#link">Link</Nav.Link>
-                        <Link to="/loginsignupcomponent">Login/Signup</Link>
+                        <Link to="/manage">Manage</Link>
+                        <Link to="/loginsignup">Login/Signup</Link>
                         <NavDropdown title="Dropdown" id="basic-nav-dropdown">
                             <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>

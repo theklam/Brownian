@@ -109,6 +109,10 @@ def holdings():
         #
 
         print("post request received")
+        print(request.json['ticker'])
+        print(request.json['quantity'])
+        new_holding = pd.DataFrame({'user_id':[1],'ticker': [request.json['ticker']], 'quantity': [request.json['quantity']], 'time': [datetime.datetime.now()]})
+        new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
         return "cool post guy"
 
 
@@ -121,7 +125,8 @@ def holdings():
         ''',db.engine)
     
     print(user_portfolio)
-    return 'got holdings'
+    portfolio = user_portfolio[user_portfolio['quantity'] > 0]
+    return portfolio.to_json(orient='index')
     
 @app.route("/prices", methods=["GET","POST"])
 def prices():
