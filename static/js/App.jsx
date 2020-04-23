@@ -4,6 +4,7 @@ import React from "react";
 import Navbar from "./NavbarComponent";
 import LoginSignUp from "./LoginSignUpComponent";
 import Home from "./HomeComponent";
+import Manage from "./ManageComponent";
 import {
   BrowserRouter as Router,
   Switch,
@@ -20,8 +21,11 @@ export default class App extends React.Component {
           <Route exact path="/">
             <Home />
           </Route>
-          <Route exact path="/loginsignupcomponent">
+          <Route exact path="/loginsignup">
             <LoginSignUp />
+          </Route>
+          <Route exact path="/manage">
+            <Manage />
           </Route>
         </Switch>
       </Router>

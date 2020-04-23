@@ -7,7 +7,7 @@ import {
     Link
 } from "react-router-dom";
 
-export default class LoginSignUpComponent extends React.Component {
+export default class HomeComponent extends React.Component {
     render() {
         return (
             <h1>Home Page</h1>
