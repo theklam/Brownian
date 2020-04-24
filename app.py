@@ -28,7 +28,8 @@ def close_connection(exception):
         db.close()
 
 def get_portfolio_value(datetime, id):
-    portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
+    portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, 
+        latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
         FROM
         (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = :user_id and time < :time group by ticker) recent_hold,
         (SELECT ticker, price, MAX(time) as time from daily_prices where time < :time group by ticker) latest_prices
@@ -79,22 +80,7 @@ def index():
 
 @app.route("/visualize")
 def visualize():
-    #example_dict = {'aapl': 3, 'agg':4, 'dis':2}
-    #print(iex_calls.get_portfolio_history(example_dict, True))
-    def get_portfolio_weights(date):
-        user_weights = pd.read_sql_query('''SELECT ticker, quantity, MAX(time) 
-            FROM holdings 
-            WHERE user_id = :user_id
-            and time < :time
-            GROUP by ticker
-            ;
-            ''',db.engine, params = {'user_id':user_id, 'time': date})
-        print(user_weights)
-
-    
-    #get_portfolio_weights('2020-04-20 20:12:48')
     nyse = mcal.get_calendar('NYSE')
-
     today = datetime.date.today()
     
     freq = 'monthly'
@@ -105,13 +91,37 @@ def visualize():
     portfolio_values = []
 
     for date in trading_dates.market_close:
-        port_value = get_portfolio_value(date.to_pydatetime(),1)
+        port_value = get_portfolio_value(date.to_pydatetime(), user_id)
         portfolio_dates.append(date.to_pydatetime())
         portfolio_values.append(port_value['total_value'].sum())
 
     portfolio_history = pd.DataFrame({'dates':portfolio_dates, 'values': portfolio_values})    
     print(portfolio_history)
     return render_template("index.html")
+@app.route("/visualizeBenchmark")
+def visualizeBenchmark():
+    # code for just the benchmark's raw price
+    benchmark = 'SPY'
+    freq = 'monthly'
+    
+    nyse = mcal.get_calendar('NYSE')
+    today = datetime.date.today()
+    freq = 'monthly'
+    if freq == 'monthly':
+        trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
+
+        df = pd.read_sql_query(''' SELECT time, price from daily_prices
+        WHERE ticker = :ticker
+        AND time >= :start
+        AND time <= :end
+        ''', db.engine, params={'ticker': benchmark, 'start':trading_dates.index[0].to_pydatetime(), 'end':trading_dates.index[-1].to_pydatetime()})
+    
+    print(df)
+    # code to track portfolio value if you invested portfolio value into benchmark 
+    initial_port = get_portfolio_value(trading_dates.market_close[0].to_pydatetime(), user_id)
+    df['price'] = df['price']*initial_port['total_value'].sum()/df['price'][0]
+    print(df)
+    return 'got benchmark'
 
 @app.route("/login", methods=["GET","POST"])
 def login():
@@ -155,7 +165,8 @@ def holdings():
 
 
     # TODO: change 'where user_id = 1' to 'where user_id = config.userid' or equivalent
-    user_portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
+    user_portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, 
+        latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
         FROM
         (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = :user_id group by ticker) recent_hold,
         (SELECT ticker, price, MAX(time) as time from daily_prices group by ticker) latest_prices
@@ -180,7 +191,7 @@ def prices():
     #print(df)
     
     
-    api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
+    #api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
     
     return "I did it mom"
 
