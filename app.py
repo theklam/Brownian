@@ -10,7 +10,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db_test.sqlite3'
 db = SQLAlchemy(app)
 user_id = None
 # Helper function that returns the sqlite database
@@ -128,6 +128,14 @@ def login():
         print(user_id)
         return 'logged in'
 
+@app.route("/logout", methods=["GET"])
+def logout():
+    if request.method == "GET":
+        global user_id
+        user_id = None
+        print('user_id is now none')
+        return 'log out done'
+
 @app.route("/signup", methods=["GET","POST"])
 def signup():
     if request.method == "POST":
@@ -145,26 +153,30 @@ def holdings():
         # if removing some with direct quantity input:
         #   request.params = {ticker: 'FB', quantity: new FB.quantity - old FB.quantity, } 
         #
-
-        print("post request received")
-        print(request.json['ticker'])
-        print(request.json['quantity'])
-        new_holding = pd.DataFrame({'user_id':[1],'ticker': [request.json['ticker']], 'quantity': [request.json['quantity']], 'time': [datetime.datetime.now()]})
-        new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
+        if user_id is not None:
+            print("post request received")
+            print(request.json['ticker'])
+            print(request.json['quantity'])
+            new_holding = pd.DataFrame({'user_id':[user_id],'ticker': [request.json['ticker']], 'quantity': [request.json['quantity']], 'time': [datetime.datetime.now()]})
+            new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
         return "cool post guy"
 
 
     # TODO: change 'where user_id = 1' to 'where user_id = config.userid' or equivalent
-    user_portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
-        FROM
-        (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = :user_id group by ticker) recent_hold,
-        (SELECT ticker, price, MAX(time) as time from daily_prices group by ticker) latest_prices
-        WHERE recent_hold.ticker = latest_prices.ticker;
-        ''',db.engine, params={'user_id': user_id})
-    
-    print(user_portfolio)
-    portfolio = user_portfolio[user_portfolio['quantity'] > 0]
-    return portfolio.to_json(orient='index')
+    if user_id is not None:
+        user_portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
+            FROM
+            (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = :user_id group by ticker) recent_hold,
+            (SELECT ticker, price, MAX(time) as time from daily_prices group by ticker) latest_prices
+            WHERE recent_hold.ticker = latest_prices.ticker;
+            ''',db.engine, params={'user_id': user_id})
+        
+        portfolio = user_portfolio[user_portfolio['quantity'] > 0]
+        print(portfolio)
+        return portfolio.to_json(orient='index')
+    else:
+        print('user_id is none here!')
+        return {}
     
 @app.route("/prices", methods=["GET","POST"])
 def prices():
