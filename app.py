@@ -4,6 +4,7 @@ import iex_calls
 import pandas as pd
 import numpy as np
 import datetime
+import pandas_market_calendars as mcal
 app = Flask(__name__, static_folder="static/dist", template_folder="static")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
@@ -11,7 +12,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 db = SQLAlchemy(app)
-
+user_id = None
 # Helper function that returns the sqlite database
 def get_db():
     db = getattr(g, '_database', None)
@@ -26,6 +27,14 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
+def get_portfolio_value(datetime, id):
+    portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
+        FROM
+        (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = :user_id and time < :time group by ticker) recent_hold,
+        (SELECT ticker, price, MAX(time) as time from daily_prices where time < :time group by ticker) latest_prices
+        WHERE recent_hold.ticker = latest_prices.ticker;
+        ''',db.engine, params = {'user_id':user_id, 'time': datetime})
+    return portfolio
 
 # Schemas for each table in the sqlite database
 class user_account(db.Model):
@@ -65,6 +74,7 @@ class risk_stats(db.Model):
 # Route to home page, currently queries database for connection reasons
 @app.route("/")
 def index():
+    print(user_id)
     return render_template("index.html")
 
 @app.route("/visualize")
@@ -74,25 +84,53 @@ def visualize():
     def get_portfolio_weights(date):
         user_weights = pd.read_sql_query('''SELECT ticker, quantity, MAX(time) 
             FROM holdings 
-            WHERE user_id = :id
+            WHERE user_id = :user_id
             and time < :time
             GROUP by ticker
             ;
-            ''',db.engine, params = {'id':1, 'time': date})
+            ''',db.engine, params = {'user_id':user_id, 'time': date})
         print(user_weights)
-    get_portfolio_weights('2020-04-20 20:12:48')
+
+    
+    #get_portfolio_weights('2020-04-20 20:12:48')
+    nyse = mcal.get_calendar('NYSE')
+
+    today = datetime.date.today()
+    
+    freq = 'monthly'
+    if freq == 'monthly':
+        trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
+    
+    portfolio_dates = []
+    portfolio_values = []
+
+    for date in trading_dates.market_close:
+        port_value = get_portfolio_value(date.to_pydatetime(),1)
+        portfolio_dates.append(date.to_pydatetime())
+        portfolio_values.append(port_value['total_value'].sum())
+
+    portfolio_history = pd.DataFrame({'dates':portfolio_dates, 'values': portfolio_values})    
+    print(portfolio_history)
     return render_template("index.html")
 
-@app.route("/login")
+@app.route("/login", methods=["GET","POST"])
 def login():
-    print('logged in')
-    return 'logged in'
+    if request.method == "POST":
+        global user_id
+        login_info = pd.read_sql_query('''SELECT id 
+        FROM user_account 
+        WHERE user_name = :username 
+        AND password = :password''', db.engine, params = {'username': request.json['username'], 'password':request.json['password']})
+        if login_info.empty:
+            print("invalid password or username")
+        else:
+            user_id = int(login_info['id'][0])
+        print(user_id)
+        return 'logged in'
 
 @app.route("/signup", methods=["GET","POST"])
 def signup():
     if request.method == "POST":
-        print(request.json['username'])
-        print(request.json['password'])
         new_user = pd.DataFrame({'user_name': [request.json['username']], 'password': [request.json['password']]})
         new_user.to_sql(name='user_account', con = db.engine, index=False, if_exists= 'append')
         return 'signup done'
@@ -115,10 +153,10 @@ def holdings():
     # TODO: change 'where user_id = 1' to 'where user_id = config.userid' or equivalent
     user_portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
         FROM
-        (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = 1 group by ticker) recent_hold,
+        (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = :user_id group by ticker) recent_hold,
         (SELECT ticker, price, MAX(time) as time from daily_prices group by ticker) latest_prices
         WHERE recent_hold.ticker = latest_prices.ticker;
-        ''',db.engine)
+        ''',db.engine, params={'user_id': user_id})
     
     print(user_portfolio)
     return 'got holdings'
@@ -131,7 +169,7 @@ def prices():
         return "cool post guy"
     
     example_dict = {'aapl': 3, 'agg':4, 'dis':2}
-    api_prices = iex_calls.get_price_data(list(example_dict.keys()), True, 'monthly')
+    api_prices = iex_calls.get_price_data(['SPY'], True, 'monthly')
     print(api_prices)
     #df = pd.read_sql_table('prices', db.engine)
     #print(df)
