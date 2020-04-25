@@ -10,7 +10,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db_test.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 db = SQLAlchemy(app)
 user_id = None
 # Helper function that returns the sqlite database
@@ -96,22 +96,25 @@ def visualize():
     portfolio_values = []
     date_list = []
     
-    if freq == 'intraday':
-        date_list = [trading_dates.market_open[-1] + datetime.timedelta(minutes=5*x) for x in range(0, 79)]
-    elif freq == 'monthly':
-        date_list = trading_dates.market_close
-        print(date_list)
-    else:
-        return "invalid frequency"
-    for date in date_list:
-        print(date)
-        port_value = get_portfolio_value(date.to_pydatetime()+datetime.timedelta(seconds=1), user_id, freq)
-        portfolio_dates.append(date.to_pydatetime())
-        portfolio_values.append(port_value['total_value'].sum())
+    if user_id is not None:
+        if freq == 'intraday':
+            date_list = [trading_dates.market_open[-1] + datetime.timedelta(minutes=5*x) for x in range(0, 79)]
+        elif freq == 'monthly':
+            date_list = trading_dates.market_close
+            print(date_list)
+        else:
+            return "invalid frequency"
+        for date in date_list:
+            print(date)
+            port_value = get_portfolio_value(date.to_pydatetime()+datetime.timedelta(seconds=1), user_id, freq)
+            portfolio_dates.append(date.to_pydatetime())
+            portfolio_values.append(port_value['total_value'].sum())
 
-    portfolio_history = pd.DataFrame({'dates':portfolio_dates, 'values': portfolio_values})    
-    print(portfolio_history)
-    return render_template("index.html")
+        portfolio_history = pd.DataFrame({'dates':portfolio_dates, 'values': portfolio_values})
+        return portfolio_history.to_json(orient='index')
+    else:
+        print('user_id is none here!')
+        return {}
 
 # TODO add in functionality for intraday prices
 # TODO be able to choose different benchmarks
@@ -126,26 +129,32 @@ def visualizeBenchmark():
     freq = 'intraday'
     initial_port = pd.DataFrame
     
-    if freq == 'intraday':
-        print(trading_dates.market_open[-1].to_pydatetime())
-        df = pd.read_sql_query(''' SELECT time, price from intraday_prices
-        WHERE ticker = :ticker
-        AND time >= :start
-        ''', db.engine, params={'ticker': benchmark, 'start':trading_dates.index[-1].to_pydatetime()})
-        initial_port = get_portfolio_value(trading_dates.market_open[-1].to_pydatetime()+datetime.timedelta(seconds=1), user_id, 'intraday')
-    elif freq == 'monthly':
-        print(trading_dates)
-        df = pd.read_sql_query(''' SELECT time, price from daily_prices
-        WHERE ticker = :ticker
-        AND time >= :start
-        AND time <= :end
-        ''', db.engine, params={'ticker': benchmark, 'start':trading_dates.index[0].to_pydatetime(), 'end':trading_dates.index[-1].to_pydatetime()})
-        # code to track portfolio value if you invested portfolio value into benchmark 
-        initial_port = get_portfolio_value(trading_dates.market_close[0].to_pydatetime(), user_id, 'monthly')
-    
-    df['price'] = df['price']*initial_port['total_value'].sum()/df['price'][0]
-    print(df)
-    return 'got benchmark'
+    if user_id is not None:
+        if freq == 'intraday':
+            print(trading_dates.market_open[-1].to_pydatetime())
+            df = pd.read_sql_query(''' SELECT time, price from intraday_prices
+            WHERE ticker = :ticker
+            AND time >= :start
+            ''', db.engine, params={'ticker': benchmark, 'start':trading_dates.index[-1].to_pydatetime()})
+            initial_port = get_portfolio_value(trading_dates.market_open[-1].to_pydatetime()+datetime.timedelta(seconds=1), user_id, 'intraday')
+        elif freq == 'monthly':
+            print(trading_dates)
+            df = pd.read_sql_query(''' SELECT time, price from daily_prices
+            WHERE ticker = :ticker
+            AND time >= :start
+            AND time <= :end
+            ''', db.engine, params={'ticker': benchmark, 'start':trading_dates.index[0].to_pydatetime(), 'end':trading_dates.index[-1].to_pydatetime()})
+            # code to track portfolio value if you invested portfolio value into benchmark 
+            initial_port = get_portfolio_value(trading_dates.market_close[0].to_pydatetime(), user_id, 'monthly')
+        
+
+        if df.empty:
+            return {}
+        df['price'] = df['price']*initial_port['total_value'].sum()/df['price'][0]
+        return df.to_json(orient='index')
+    else:
+        print('user_id is none here!')
+        return {}
 
 # TODO route to homepage if signup successful and display error message if not
 @app.route("/login", methods=["GET","POST"])
@@ -229,7 +238,7 @@ def prices():
 
     stocks_to_update = ['AAPL', 'AGG', 'DIS', 'SPY', "FB"]
     update = 'portfolio'
-    freq = 'intraday'
+    freq = 'monthly'
     
     if freq == 'intraday':
         for stock in stocks_to_update:
