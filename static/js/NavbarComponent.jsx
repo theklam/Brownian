@@ -8,6 +8,20 @@ import {
 } from "react-router-dom";
 
 export default class NavbarComponent extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+
+        };
+        this.handleLogout = this.handleLogout.bind(this);
+    }
+
+    handleLogout() {
+        fetch("/logout")
+            .then(response => this.props.fetchCurrentHoldings());
+    }
+
     render() {
         return (
             <Navbar bg="light" expand="lg">
@@ -27,8 +41,7 @@ export default class NavbarComponent extends React.Component {
                         </NavDropdown>
                     </Nav>
                     <Form inline>
-                        <FormControl type="text" placeholder="Search" className="mr-sm-2" />
-                        <Button variant="outline-success">Search</Button>
+                        <Button variant="outline-success" onClick={this.handleLogout}>Logout</Button>
                     </Form>
                 </Navbar.Collapse>
             </Navbar>

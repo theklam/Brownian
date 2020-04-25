@@ -28,8 +28,6 @@ export default class UpdateTickerTableForm extends React.Component {
     }
 
     postNewStock() {
-        // do the posting
-
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -37,10 +35,6 @@ export default class UpdateTickerTableForm extends React.Component {
         };
         fetch('/holdings', requestOptions)
             .then(response => this.props.fetchCurrentHoldings());
-            // .then(data => console.log(data));
-
-        // then refresh
-        // this.props.fetchCurrentHoldings();
     }
 
     render() {

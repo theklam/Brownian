@@ -37,9 +37,7 @@ export default class LoginSignUpComponent extends React.Component {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: this.state.username, password: this.state.password })
         };
-        fetch('/login', requestOptions)
-            .then(response => response.json())
-            .then(data => console.log(data));
+        fetch('/login', requestOptions);
     }
 
     handleSignup(e) {
@@ -50,9 +48,7 @@ export default class LoginSignUpComponent extends React.Component {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: this.state.username, password: this.state.password })
         };
-        fetch('/signup', requestOptions)
-            .then(response => response.json())
-            .then(data => console.log(data));
+        fetch('/signup', requestOptions);
 
     }
 
