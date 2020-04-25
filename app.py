@@ -91,7 +91,7 @@ def visualize():
     nyse = mcal.get_calendar('NYSE')
     today = datetime.date.today()
     trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
-    freq = 'intraday'
+    freq = 'monthly'
     portfolio_dates = []
     portfolio_values = []
     date_list = []
@@ -126,7 +126,7 @@ def visualizeBenchmark():
     nyse = mcal.get_calendar('NYSE')
     today = datetime.date.today()
     trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
-    freq = 'intraday'
+    freq = 'monthly'
     initial_port = pd.DataFrame
     
     if user_id is not None:

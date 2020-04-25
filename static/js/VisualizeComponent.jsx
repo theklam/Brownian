@@ -8,8 +8,8 @@ export default class VisualizeComponent extends React.Component {
 
     componentDidMount() {
         this.props.fetchCurrentVisualize()
-            .then(() => console.log('test post pull'));
-            // .then(draw(this.props.visualize));
+            .then(() => console.log('test post pull'))
+            .then(() => draw(this.props.visualize));
     }
 
     render() {
