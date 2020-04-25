@@ -20,10 +20,12 @@ export default class App extends React.Component {
     this.state = {
       isLoaded: false,
       items: [],
-      visualize: []
+      portfolioViz: [],
+      benchmarkViz: []
     };
     this.fetchCurrentHoldings = this.fetchCurrentHoldings.bind(this);
-    this.fetchCurrentVisualize = this.fetchCurrentVisualize.bind(this);
+    this.fetchCurrentPortfolio = this.fetchCurrentPortfolio.bind(this);
+    this.fetchCurrentBenchmark = this.fetchCurrentBenchmark.bind(this);
   }
 
   fetchCurrentHoldings() {
@@ -50,19 +52,47 @@ export default class App extends React.Component {
       )
   }
 
-  fetchCurrentVisualize() {
+  fetchCurrentPortfolio() {
     return fetch("/visualize")
       .then(res => res.json())
       .then(
         (result) => {
           console.log(result);
           let tmp = Object.values(result);
-          tmp = tmp.map(x=>x.values);
+          tmp = tmp.map(x => x.values);
           this.setState({
             isLoaded: true,
-            visualize: tmp
+            portfolioViz: tmp
           });
-          console.log(this.state.visualize);
+          console.log(this.state.portfolioViz);
+        },
+        // Note: it's important to handle errors here
+        // instead of a catch() block so that we don't swallow
+        // exceptions from actual bugs in components.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
+  }
+
+  fetchCurrentBenchmark() {
+    return fetch("/visualizeBenchmark")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          console.log('benchmark is: ');
+          console.log(result);
+          let tmp = Object.values(result);
+          tmp = tmp.map(x => x.price);
+          this.setState({
+            isLoaded: true,
+            benchmarkViz: tmp
+          });
+          console.log('benchmark processed is: ');
+          console.log(this.state.benchmarkViz);
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow
@@ -91,7 +121,8 @@ export default class App extends React.Component {
             <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} />
           </Route>
           <Route exact path="/visualize">
-            <Visualize fetchCurrentVisualize={this.fetchCurrentVisualize} visualize={this.state.visualize} />
+            <Visualize fetchCurrentVisualize={this.fetchCurrentPortfolio} visualize={this.state.portfolioViz} title="Portfolio" />
+            <Visualize fetchCurrentVisualize={this.fetchCurrentBenchmark} visualize={this.state.benchmarkViz} title="Benchmark" />
           </Route>
         </Switch>
       </Router>

@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-const draw = (props) => {
+const draw = (props, title) => {
     // 2. Use the margin convention practice 
     var margin = { top: 50, right: 50, bottom: 50, left: 50 }
         , width = window.innerWidth - margin.left - margin.right // Use the window's width 
@@ -65,5 +65,13 @@ const draw = (props) => {
             // this.attr('class', 'focus')
         })
         .on("mouseout", function () { })
+
+    svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("text-decoration", "underline")
+        .text(title);
 }
 export default draw
