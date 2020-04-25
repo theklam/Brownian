@@ -7,7 +7,7 @@ const draw = (props) => {
         , height = window.innerHeight - margin.top - margin.bottom; // Use the window's height
 
     // The number of datapoints
-    var n = 21;
+    var n = props.length;
 
     // 5. X scale will use the index of our data
     var xScale = d3.scaleLinear()
@@ -16,7 +16,7 @@ const draw = (props) => {
 
     // 6. Y scale will use the randomly generate number 
     var yScale = d3.scaleLinear()
-        .domain([0, 1]) // input 
+        .domain([0, d3.max(props)]) // input 
         .range([height, 0]); // output 
 
     // 7. d3's line generator
@@ -26,7 +26,7 @@ const draw = (props) => {
         .curve(d3.curveMonotoneX) // apply smoothing to the line
 
     // 8. An array of objects of length N. Each object has key -> value pair, the key being "y" and the value is a random number
-    var dataset = d3.range(n).map(function (d) { return { "y": d3.randomUniform(1)() } })
+    var dataset = d3.range(n).map(function (d) { return { "y": props[d] } })
 
     // 1. Add the SVG to the page and employ #2
     var svg = d3.select(".viz").append("svg")

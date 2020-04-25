@@ -57,7 +57,7 @@ export default class App extends React.Component {
         (result) => {
           console.log(result);
           let tmp = Object.values(result);
-          // tmp.map(x=>x.values);
+          tmp = tmp.map(x=>x.values);
           this.setState({
             isLoaded: true,
             visualize: tmp
