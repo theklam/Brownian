@@ -1,16 +1,20 @@
 import React from "react";
-import { Form, Button } from 'react-bootstrap';
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link
-} from "react-router-dom";
+import draw from './helpers.js'
 
 export default class VisualizeComponent extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    componentDidMount() {
+        this.props.fetchCurrentVisualize()
+            .then(() => console.log('test post pull'));
+            // .then(draw(this.props.visualize));
+    }
+
     render() {
         return (
-            <h1>Visualize Page</h1>
+            <div className="viz"></div>
         );
     }
 }

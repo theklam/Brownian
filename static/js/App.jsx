@@ -19,9 +19,11 @@ export default class App extends React.Component {
     super(props);
     this.state = {
       isLoaded: false,
-      items: []
+      items: [],
+      visualize: []
     };
     this.fetchCurrentHoldings = this.fetchCurrentHoldings.bind(this);
+    this.fetchCurrentVisualize = this.fetchCurrentVisualize.bind(this);
   }
 
   fetchCurrentHoldings() {
@@ -35,6 +37,29 @@ export default class App extends React.Component {
             isLoaded: true,
             items: Object.values(result)
           });
+        },
+        // Note: it's important to handle errors here
+        // instead of a catch() block so that we don't swallow
+        // exceptions from actual bugs in components.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
+  }
+
+  fetchCurrentVisualize() {
+    return fetch("/visualize")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            isLoaded: true,
+            visualize: Object.values(result).map(x=>x.values)
+          });
+          console.log(this.state.visualize);
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow
@@ -63,7 +88,7 @@ export default class App extends React.Component {
             <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} />
           </Route>
           <Route exact path="/visualize">
-            <Visualize />
+            <Visualize fetchCurrentVisualize={this.fetchCurrentVisualize} visualize={this.state.visualize} />
           </Route>
         </Switch>
       </Router>
