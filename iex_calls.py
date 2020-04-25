@@ -3,8 +3,10 @@ import pandas as pd
 import os
 from iexfinance.stocks import Stock
 from iexfinance.stocks import get_historical_data
+from iexfinance.stocks import get_historical_intraday
 import datetime
 import calendar
+import pytz
 
 example_dict = {'aapl': 3, 'agg':4, 'dis':2}
 
@@ -42,34 +44,53 @@ def get_portfolio_history(holdings_dict, testing):
 def get_price_data(stocks, testing, freq= 'monthly'):
     setup_api_variables(testing)
     today = datetime.date.today()
-    if freq == 'monthly':
-        days_in_month = calendar.monthrange(today.year, today.month-1)[1]
-        start = today - datetime.timedelta(days=days_in_month)
-    end = today
 
     num_stocks = len(stocks)
     if num_stocks == 0:
         return pd.DataFrame
     
-    df = get_historical_data(stocks, start, end, close_only = True, output_format = 'pandas')
-    if num_stocks == 1:
-        df.drop(columns = ['volume'], inplace=True)
-        df.rename(columns = {'close':stocks[0]}, inplace = True)
-    elif num_stocks >=2:
-        df.drop(columns = ['volume'], level = 1, inplace = True)
-        df.columns = df.columns.droplevel(1)
-    df.reset_index(level=0, inplace=True)
-    print(df)
-    # Rearranges table so tickers become a data point
-    database_df = pd.melt(df, id_vars=['date'], value_vars=df.columns[1:])
-    database_df.rename(columns = {'date':'time', 'variable': 'ticker', 'value': 'price'}, inplace = True)
-    return database_df
+    if freq == 'intraday':
+        for stock in stocks:
+            df = get_historical_intraday(stock, today-datetime.timedelta(days = 1), output_format='pandas')
+            if df.empty:
+                return df
+            df.reset_index(level=0, inplace=True)
+            df = df[['index', 'close']]
+            df.rename(columns = {'close':'price', 'index': 'time'}, inplace = True)
+            utc_diff = datetime.datetime.utcnow().replace(microsecond=0)-datetime.datetime.now().replace(microsecond=0)
+            df['time'] = df['time']+utc_diff
+            df['ticker'] = stock
+            return df[df['price'].notnull()]
+
+    if freq == 'monthly':
+        days_in_month = calendar.monthrange(today.year, today.month-1)[1]
+        start = today - datetime.timedelta(days=days_in_month)
+        end = today
+        df = get_historical_data(stocks, start, end, close_only = True, output_format = 'pandas')
+        if df.empty:
+            return df
+        if num_stocks == 1:
+            df.drop(columns = ['volume'], inplace=True)
+            df.reset_index(level=0, inplace=True)
+            df.rename(columns = {'close':'price'}, inplace = True)
+            df['ticker'] = stocks[0]
+            #print(df[df['price'].notnull()])
+            return df[df['price'].notnull()]
+        elif num_stocks >=2:
+            df.drop(columns = ['volume'], level = 1, inplace = True)
+            df.columns = df.columns.droplevel(1)
+            df.reset_index(level=0, inplace=True)
+            # Rearranges table so tickers become a data point
+            database_df = pd.melt(df, id_vars=['date'], value_vars=df.columns[1:])
+            database_df.rename(columns = {'date':'time', 'variable': 'ticker', 'value': 'price'}, inplace = True)
+            #print(database_df)
+            return database_df
 
 def month_before(date):
     days_in_month = calendar.monthrange(date.year, date.month-1)[1]
     return date - datetime.timedelta(days=days_in_month)
 
 setup_api_variables(True)
-#get_price_data(["SPY", 'IVV'], True)
+#get_price_data(['SPY'], True, 'intraday')
 #print(get_portfolio_value(example_dict))
 #print(get_portfolio_history(example_dict))
