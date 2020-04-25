@@ -32,6 +32,7 @@ export default class NavbarComponent extends React.Component {
                         <Link to="/">Home</Link>
                         <Link to="/manage">Manage</Link>
                         <Link to="/loginsignup">Login/Signup</Link>
+                        <Link to="/visualize">Visualize</Link>
                         <NavDropdown title="Dropdown" id="basic-nav-dropdown">
                             <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>

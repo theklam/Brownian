@@ -5,6 +5,7 @@ import Navbar from "./NavbarComponent";
 import LoginSignUp from "./LoginSignUpComponent";
 import Home from "./HomeComponent";
 import Manage from "./ManageComponent";
+import Visualize from "./VisualizeComponent";
 import {
   BrowserRouter as Router,
   Switch,
@@ -60,6 +61,9 @@ export default class App extends React.Component {
           </Route>
           <Route exact path="/manage">
             <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} />
+          </Route>
+          <Route exact path="/visualize">
+            <Visualize />
           </Route>
         </Switch>
       </Router>
