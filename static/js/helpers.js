@@ -62,9 +62,11 @@ const draw = (props, title) => {
         .attr("r", 5)
         .on("mouseover", function (a, b, c) {
             console.log(a)
-            // this.attr('class', 'focus')
+            d3.select(this).attr('class', 'focus');
         })
-        .on("mouseout", function () { })
+        .on("mouseout", function () { 
+            d3.select(this).attr('class', 'dot');
+        })
 
     svg.append("text")
         .attr("x", (width / 2))
