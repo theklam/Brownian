@@ -12,7 +12,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
 db = SQLAlchemy(app)
-user_id = None
+user_id = 1
 # Helper function that returns the sqlite database
 def get_db():
     db = getattr(g, '_database', None)
@@ -27,7 +27,7 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-def get_portfolio_value(datetime, id, freq):
+def get_portfolio_value(datetime, user_id, freq):
     table = 'daily_prices'
     if freq == 'intraday':
         table = 'intraday_prices'
@@ -42,8 +42,42 @@ def get_portfolio_value(datetime, id, freq):
     print(portfolio)
     return portfolio
 
+def efficient_user_value(opening_time, user_id, freq):    
+    #list_of_initial_holdings = "select ticker, quantity, max(time) as time from holdings where user_id = :user_id and time <= :initial_time group by ticker;"
+    #list_of_holdings_changes = "select ticker, quantity, time from holdings where user_id = :user_id and time > :initial_time;"
+    #initial_prices = "select ticker, price, max(time) as time from intraday_prices where time <= :time group by ticker"
+    table = 'daily_prices'
+    if freq == 'intraday':
+        table = 'intraday_prices'
+    init_hold  = pd.read_sql_query('''SELECT ticker, quantity, max(time) as time 
+    from holdings 
+    where user_id = :user_id 
+    and time <= :initial_time 
+    group by ticker;
+    ''', db.engine, params = {'user_id':user_id, 'initial_time': opening_time})
+    #print(init_hold)
+    changes_in_hold  = pd.read_sql_query('''SELECT ticker, quantity, time 
+    from holdings 
+    where user_id = :user_id 
+    and time > :initial_time;
+    ''', db.engine, params = {'user_id':user_id, 'initial_time': opening_time})
+    #print(changes_in_hold)
 
+    init_price = pd.read_sql_query('''select ticker, price, max(time) as time from {} where time <= :initial_time group by ticker;
+    '''.format(table), db.engine, params = {'initial_time': opening_time}) 
+    init_price = init_price.pivot(index = 'time', columns = 'ticker', values = 'price')
+    
+    changes_in_price  = pd.read_sql_query('''select ticker, price, time from {} where time > :initial_time
+    '''.format(table), db.engine, params = {'initial_time': opening_time})
+    reformatted = changes_in_price.pivot(index = 'time', columns = 'ticker', values = 'price')
 
+    # Fills in gaps in intraday prices with most recent available price
+    for ticker in reformatted.iloc[0].index:
+        if np.isnan(reformatted.iloc[0][ticker]):
+            reformatted.iloc[0][ticker] = init_price[ticker]
+    reformatted.fillna(method='ffill', inplace = True)
+    return reformatted[init_hold['ticker']].dot(init_hold['quantity'].values)
+    
 # Schemas for each table in the sqlite database
 class user_account(db.Model):
     id = db.Column(db.Integer, primary_key =True, nullable = False)
@@ -88,6 +122,7 @@ def index():
 # TODO Add in functionality for intraday prices
 @app.route("/visualize")
 def visualize():
+    timer = datetime.datetime.now()
     nyse = mcal.get_calendar('NYSE')
     today = datetime.date.today()
     trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
@@ -101,7 +136,6 @@ def visualize():
             date_list = [trading_dates.market_open[-1] + datetime.timedelta(minutes=5*x) for x in range(0, 79)]
         elif freq == 'monthly':
             date_list = trading_dates.market_close
-            print(date_list)
         else:
             return "invalid frequency"
         for date in date_list:
@@ -111,6 +145,23 @@ def visualize():
             portfolio_values.append(port_value['total_value'].sum())
 
         portfolio_history = pd.DataFrame({'dates':portfolio_dates, 'values': portfolio_values})
+        print(datetime.datetime.now() - timer)
+        return portfolio_history.to_json(orient='index')
+    else:
+        print('user_id is none here!')
+        return {}
+
+# TODO Add in functionality for intraday prices
+@app.route("/visualizeTest")
+def visualizeTest():
+    timer = datetime.datetime.now()
+    nyse = mcal.get_calendar('NYSE')
+    today = datetime.date.today()
+    trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
+    freq = 'intraday'
+    if user_id is not None:
+        portfolio_history = efficient_user_value(trading_dates.market_open[-1].to_pydatetime(), user_id, freq)
+        print(datetime.datetime.now() - timer)
         return portfolio_history.to_json(orient='index')
     else:
         print('user_id is none here!')
@@ -238,11 +289,11 @@ def prices():
 
     stocks_to_update = ['AAPL', 'AGG', 'DIS', 'SPY', "FB"]
     update = 'portfolio'
-    freq = 'monthly'
+    freq = 'intraday'
     
     if freq == 'intraday':
         for stock in stocks_to_update:
-            api_prices = iex_calls.get_price_data([stock], True, freq)
+            api_prices = iex_calls.get_price_data([stock], True, freq, datetime.date(2020,4,23))
             api_prices.to_sql(name='intraday_prices', con = db.engine, index=False, if_exists= 'append')
 
     if freq == 'monthly':
