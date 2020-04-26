@@ -41,9 +41,9 @@ def get_portfolio_history(holdings_dict, testing):
 
 
 # Returns a pandas data from with prices from a list of tickers and frequency
-def get_price_data(stocks, testing, freq= 'monthly'):
+def get_price_data(stocks, testing, freq= 'monthly', date = datetime.date.today()):
     setup_api_variables(testing)
-    today = datetime.date.today()
+    #today = datetime.date.today()
 
     num_stocks = len(stocks)
     if num_stocks == 0:
@@ -51,7 +51,7 @@ def get_price_data(stocks, testing, freq= 'monthly'):
     
     if freq == 'intraday':
         for stock in stocks:
-            df = get_historical_intraday(stock, today-datetime.timedelta(days = 1), output_format='pandas')
+            df = get_historical_intraday(stock, date, output_format='pandas')
             if df.empty:
                 return df
             df.reset_index(level=0, inplace=True)
@@ -63,9 +63,9 @@ def get_price_data(stocks, testing, freq= 'monthly'):
             return df[df['price'].notnull()]
 
     if freq == 'monthly':
-        days_in_month = calendar.monthrange(today.year, today.month-1)[1]
-        start = today - datetime.timedelta(days=days_in_month)
-        end = today
+        days_in_month = calendar.monthrange(date.year, date.month-1)[1]
+        start = date - datetime.timedelta(days=days_in_month)
+        end = date
         df = get_historical_data(stocks, start, end, close_only = True, output_format = 'pandas')
         if df.empty:
             return df
