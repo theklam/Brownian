@@ -6,6 +6,7 @@ import {
     Route,
     Link
 } from "react-router-dom";
+import { LinkContainer } from 'react-router-bootstrap';
 
 export default class NavbarComponent extends React.Component {
 
@@ -25,21 +26,14 @@ export default class NavbarComponent extends React.Component {
     render() {
         return (
             <Navbar bg="light" expand="lg">
-                <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
+                <Navbar.Brand href="#home">Brownian</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
-                        <Link to="/">Home</Link>
-                        <Link to="/manage">Manage</Link>
-                        <Link to="/loginsignup">Login/Signup</Link>
-                        <Link to="/visualize">Visualize</Link>
-                        <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-                            <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
-                        </NavDropdown>
+                        <LinkContainer to="/"><Nav.Link href="/">Home</Nav.Link></LinkContainer>
+                        <LinkContainer to="/manage"><Nav.Link href="/manage">Manage</Nav.Link></LinkContainer>
+                        <LinkContainer to="/loginsignup"><Nav.Link href="/loginsignup">Login/Signup</Nav.Link></LinkContainer>
+                        <LinkContainer to="/visualize"><Nav.Link href="/visualize">Visualize</Nav.Link></LinkContainer>
                     </Nav>
                     <Form inline>
                         <Button variant="outline-success" onClick={this.handleLogout}>Logout</Button>

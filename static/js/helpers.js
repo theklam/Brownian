@@ -23,7 +23,7 @@ const draw = (props, title) => {
     var line = d3.line()
         .x(function (d, i) { return xScale(i); }) // set the x values for the line generator
         .y(function (d) { return yScale(d.y); }) // set the y values for the line generator 
-        .curve(d3.curveMonotoneX) // apply smoothing to the line
+        // .curve(d3.curveMonotoneX) // apply smoothing to the line
 
     // 8. An array of objects of length N. Each object has key -> value pair, the key being "y" and the value is a random number
     var dataset = d3.range(n).map(function (d) { return { "y": props[d] } })
