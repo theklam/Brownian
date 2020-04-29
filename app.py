@@ -253,25 +253,30 @@ def holdings():
         #   request.params = {ticker: 'FB', quantity: new FB.quantity - old FB.quantity, } 
         #
         if user_id is not None:
-            print("post request received")
-            print(request.json['ticker'])
-            print(request.json['quantity'])
             new_holding = pd.DataFrame({'user_id':[user_id],'ticker': [request.json['ticker']], 'quantity': [request.json['quantity']], 'time': [datetime.datetime.now()]})
             new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
-        return "cool post guy"
-
+            new_holding_price = user_portfolio = pd.read_sql_query('''
+            SELECT ticker, price, MAX(time) as time from intraday_prices where ticker = :ticker;
+            ''',db.engine, params={'ticker': request.json['ticker']}, parse_dates=['time'])
+            most_recent = new_holding_price['time'][0]
+            if most_recent < datetime.date.today() or pd.isnull(most_recent):
+                return("Update Price")
+        else:
+            print('user_id is none here!')
+        
+        return {}
 
     # TODO: change 'where user_id = 1' to 'where user_id = config.userid' or equivalent
     if user_id is not None:
         user_portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
             FROM
-            (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = :user_id group by ticker) recent_hold,
-            (SELECT ticker, price, MAX(time) as time from daily_prices group by ticker) latest_prices
+            (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = 1 group by ticker) recent_hold,
+            (SELECT ticker, price, MAX(time) as time from intraday_prices group by ticker) latest_prices
             WHERE recent_hold.ticker = latest_prices.ticker;
             ''',db.engine, params={'user_id': user_id})
         
         portfolio = user_portfolio[user_portfolio['quantity'] > 0]
-        print(portfolio)
+        #print(portfolio)
         return portfolio.to_json(orient='index')
     else:
         print('user_id is none here!')
@@ -284,30 +289,30 @@ def holdings():
 def prices():
 
     if request.method == "POST":
-        print("post request received")
-        return "cool post guy"
+        if user_id is not None:
+            stocks_to_update = request.json['stocks']
+            freq = request.json['freq']
+        
+            if freq == 'intraday':
+                for stock in stocks_to_update:
+                    api_prices = iex_calls.get_price_data([stock], True, freq)
+                    api_prices.to_sql(name='intraday_prices', con = db.engine, index=False, if_exists= 'append')
 
-    stocks_to_update = ['AAPL', 'AGG', 'DIS', 'SPY', "FB"]
-    update = 'portfolio'
-    freq = 'intraday'
-    
-    if freq == 'intraday':
-        for stock in stocks_to_update:
-            api_prices = iex_calls.get_price_data([stock], True, freq, datetime.date(2020,4,23))
-            api_prices.to_sql(name='intraday_prices', con = db.engine, index=False, if_exists= 'append')
-
-    if freq == 'monthly':
-        api_prices = iex_calls.get_price_data(stocks_to_update, True, freq)
-        api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
-    
-    print(api_prices)
-    #df = pd.read_sql_table('prices', db.engine)
-    #print(df)
+            if freq == 'monthly':
+                api_prices = iex_calls.get_price_data(stocks_to_update, True, freq)
+                api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
+        
+            print(api_prices)
+            #df = pd.read_sql_table('prices', db.engine)
+            #print(df)
+            return api_prices.to_json(orient='index')
+        else:
+            print('user_id is none here!')
+            return {}
     
     
     
-    
-    return "I did it mom"
+    return {}
 
 # NO KNOWN BUGS
 # TODO potentially try to use the "WITH CTE as (SELECT...)" method as it is faster
