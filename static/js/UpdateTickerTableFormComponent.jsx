@@ -34,7 +34,13 @@ export default class UpdateTickerTableForm extends React.Component {
             body: JSON.stringify({ ticker: this.state.ticker, quantity: this.state.quantity })
         };
         fetch('/holdings', requestOptions)
-            .then(response => this.props.fetchCurrentHoldings());
+            .then(res => res.text())
+            .then(response =>{
+                if (response == 'Update Price'){
+                    console.log('Call a function to update prices for ' + this.state.ticker)
+                }
+                this.props.fetchCurrentHoldings()
+            });
     }
 
     render() {

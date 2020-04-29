@@ -41,7 +41,9 @@ def get_portfolio_history(holdings_dict, testing):
 
 
 # Returns a pandas data from with prices from a list of tickers and frequency
+# Parameters: stocks = list of tickers, freq = intraday, monthly or yearly, date is defaulted to today
 def get_price_data(stocks, testing, freq= 'monthly', date = datetime.date.today()):
+    print(date)
     setup_api_variables(testing)
     #today = datetime.date.today()
 
@@ -85,12 +87,33 @@ def get_price_data(stocks, testing, freq= 'monthly', date = datetime.date.today(
             database_df.rename(columns = {'date':'time', 'variable': 'ticker', 'value': 'price'}, inplace = True)
             #print(database_df)
             return database_df
-
+    if freq == 'yearly':
+        start = date - datetime.timedelta(days=365)
+        end = date
+        df = get_historical_data(stocks, start, end, close_only = True, output_format = 'pandas')
+        if df.empty:
+            return df
+        if num_stocks == 1:
+            df.drop(columns = ['volume'], inplace=True)
+            df.reset_index(level=0, inplace=True)
+            df.rename(columns = {'close':'price'}, inplace = True)
+            df['ticker'] = stocks[0]
+            #print(df[df['price'].notnull()])
+            return df[df['price'].notnull()]
+        elif num_stocks >=2:
+            df.drop(columns = ['volume'], level = 1, inplace = True)
+            df.columns = df.columns.droplevel(1)
+            df.reset_index(level=0, inplace=True)
+            # Rearranges table so tickers become a data point
+            database_df = pd.melt(df, id_vars=['date'], value_vars=df.columns[1:])
+            database_df.rename(columns = {'date':'time', 'variable': 'ticker', 'value': 'price'}, inplace = True)
+            #print(database_df)
+            return database_df
 def month_before(date):
     days_in_month = calendar.monthrange(date.year, date.month-1)[1]
     return date - datetime.timedelta(days=days_in_month)
 
 setup_api_variables(True)
-#get_price_data(['SPY'], True, 'intraday')
+print(get_price_data(['SPY'], True, 'yearly'))
 #print(get_portfolio_value(example_dict))
 #print(get_portfolio_history(example_dict))
