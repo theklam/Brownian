@@ -23,8 +23,8 @@ export default class ManageComponent extends React.Component {
         return (
             <div>
                 <TickerTable items={this.props.items} />
-                <UpdateTickerTableForm fetchCurrentHoldings={this.props.fetchCurrentHoldings}/>
-                <UpdatePricesButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items}/>
+                <UpdateTickerTableForm fetchCurrentHoldings={this.props.fetchCurrentHoldings} fetchPrices={this.props.fetchPrices}/>
+                <UpdatePricesButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/>
             </div>
         );
     }

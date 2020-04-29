@@ -27,6 +27,7 @@ export default class UpdateTickerTableForm extends React.Component {
         this.setState({ quantity: event.target.value });
     }
 
+    // this function gets called when we try to add a new stonk
     postNewStock() {
         const requestOptions = {
             method: 'POST',
@@ -35,11 +36,18 @@ export default class UpdateTickerTableForm extends React.Component {
         };
         fetch('/holdings', requestOptions)
             .then(res => res.text())
-            .then(response =>{
-                if (response == 'Update Price'){
-                    console.log('Call a function to update prices for ' + this.state.ticker)
-                }
-                this.props.fetchCurrentHoldings()
+            .then(response => {
+                // this is the response if we don't have a price for the stock we want to add
+                // if we dont have a price for the stock we want to add, then we want to
+                // get a price for the stock we want to add. 
+                // if (response == 'Update Price') {
+                //     console.log('Call a function to update prices for ' + this.state.ticker);
+                //     this.props.fetchPrices([this.state.ticker]);
+                // }
+                // else {
+                //     this.props.fetchCurrentHoldings();
+                // }
+                this.props.fetchCurrentHoldings();
             });
     }
 

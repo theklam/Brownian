@@ -26,6 +26,7 @@ export default class App extends React.Component {
     this.fetchCurrentHoldings = this.fetchCurrentHoldings.bind(this);
     this.fetchCurrentPortfolio = this.fetchCurrentPortfolio.bind(this);
     this.fetchCurrentBenchmark = this.fetchCurrentBenchmark.bind(this);
+    this.fetchPrices = this.fetchPrices.bind(this);
   }
 
   fetchCurrentHoldings() {
@@ -34,7 +35,8 @@ export default class App extends React.Component {
       .then(
         (result) => {
           console.log('result is: ')
-          console.log(result);
+          console.log(Object.values(result));
+          console.log(typeof(Object.values(result)));
           this.setState({
             isLoaded: true,
             items: Object.values(result)
@@ -106,6 +108,25 @@ export default class App extends React.Component {
       )
   }
 
+  // fetchPrices takes in an array, i.e., [AAPL, TWTR, ...], and updates the prices of said array
+  // if no array is provided, then the one that we use is the items array
+  fetchPrices(portfolio_stocks) {
+    console.log('in the fetch prices function!~~~~~~');
+    console.log('portfolio_stocks is: ');
+    console.log(typeof(portfolio_stocks));
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stocks: portfolio_stocks, freq: 'intraday' })
+    };
+    return fetch('/prices', requestOptions)
+      .then(response => {
+        console.log('fetch prices returned successfully!');
+        console.log(response);
+        this.fetchCurrentHoldings();
+      });
+  }
+
   render() {
     return (
       <Router>
@@ -118,7 +139,7 @@ export default class App extends React.Component {
             <LoginSignUp />
           </Route>
           <Route exact path="/manage">
-            <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} />
+            <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} fetchPrices={this.fetchPrices} />
           </Route>
           <Route exact path="/visualize">
             <Visualize fetchCurrentVisualize={this.fetchCurrentPortfolio} visualize={this.state.portfolioViz} title="Portfolio" />
