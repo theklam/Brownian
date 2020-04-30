@@ -10,7 +10,9 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db_test.sqlite3'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///risk_testing.sqlite3'
+
 db = SQLAlchemy(app)
 user_id = 1
 # Helper function that returns the sqlite database
@@ -295,7 +297,6 @@ def holdings():
 # TODO be able to adapt it to handle multiple frequencies. (Either pass always pass frequencies in as a list and iterate through with current if statements)
 @app.route("/prices", methods=["GET","POST"])
 def prices():
-
     if request.method == "POST":
         if user_id is not None:
             stocks_to_update = request.json['stocks']
@@ -307,10 +308,10 @@ def prices():
                     api_prices = iex_calls.get_price_data([stock], True, freq)
                     api_prices.to_sql(name='intraday_prices', con = db.engine, index=False, if_exists= 'append')
 
-            if freq == 'monthly':
+            elif freq == 'monthly' or freq == 'yearly':
                 api_prices = iex_calls.get_price_data(stocks_to_update, True, freq)
                 api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
-        
+
             print(api_prices)
             #df = pd.read_sql_table('prices', db.engine)
             #print(df)
@@ -324,6 +325,35 @@ def prices():
     
     return {}
 
+@app.route("/portfolioRisk", methods=["GET","POST"])
+def portfolioRisk():
+    if request.method == "POST":
+        if user_id is not None:
+            stock_list ='(' + ', '.join("'{0}'".format(w) for w in request.json['stocks']) + ')'
+            print(stock_list)
+            portfolio_prices = pd.read_sql_query('''select ticker, price, time from {} where time >= ? and time <= :end and ticker in ({});
+            '''.format('daily_prices',','.join('?' * len(request.json['stocks']))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + request.json['stocks']) 
+            portfolio_prices = portfolio_prices.pivot(index = 'time', columns = 'ticker', values = 'price')
+
+            returns_daily = portfolio_prices.pct_change()
+            log_returns = np.log(1 + returns_daily)
+            returns_annual = returns_daily.mean()*252
+            log_returns_annual = np.exp(252*log_returns.mean())-1
+            cov_daily = log_returns.cov()
+            cov_annual = cov_daily * 252
+            values = np.array(request.json['values'])
+            weights = values/np.sum(values)
+            returns = np.dot(weights, log_returns_annual)
+            volatility = np.sqrt(np.dot(weights.T, np.dot(cov_annual, weights)))
+            print(returns)
+            print(volatility)
+        else:
+            print('user_id is none here!')
+            return {}
+    
+    
+    
+    return {}
 # NO KNOWN BUGS
 # TODO potentially try to use the "WITH CTE as (SELECT...)" method as it is faster
 @app.route("/cleanDB")

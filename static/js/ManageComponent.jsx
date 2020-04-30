@@ -9,6 +9,7 @@ import {
 import TickerTable from "./TickerTableComponent";
 import UpdateTickerTableForm from "./UpdateTickerTableFormComponent";
 import UpdatePricesButton from "./UpdatePricesButtonComponent";
+import PortfolioRiskButton from "./PortfolioRiskButtonComponent";
 
 export default class ManageComponent extends React.Component {
     constructor(props) {
@@ -23,8 +24,10 @@ export default class ManageComponent extends React.Component {
         return (
             <div>
                 <TickerTable items={this.props.items} />
+
                 <UpdateTickerTableForm fetchCurrentHoldings={this.props.fetchCurrentHoldings} fetchPrices={this.props.fetchPrices}/>
                 <UpdatePricesButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/>
+                <PortfolioRiskButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/>
             </div>
         );
     }

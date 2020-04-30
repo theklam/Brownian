@@ -8,6 +8,7 @@ export default class UpdatePricesButton extends React.Component {
     }
 
 
+
     handleClick() {
         this.props.fetchPrices(this.props.items.map(a=>a.ticker));
     }
