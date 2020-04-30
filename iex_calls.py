@@ -114,6 +114,6 @@ def month_before(date):
     return date - datetime.timedelta(days=days_in_month)
 
 setup_api_variables(True)
-print(get_price_data(['SPY'], True, 'yearly'))
+#print(get_price_data(['AAPL', 'AGG', 'DIS', 'FB', 'SPY'], True, 'yearly'))
 #print(get_portfolio_value(example_dict))
 #print(get_portfolio_history(example_dict))
