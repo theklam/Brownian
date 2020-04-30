@@ -10,7 +10,9 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///risk_testing.sqlite3'
+
 db = SQLAlchemy(app)
 user_id = 1
 # Helper function that returns the sqlite database
@@ -259,8 +261,15 @@ def holdings():
             SELECT ticker, price, MAX(time) as time from intraday_prices where ticker = :ticker;
             ''',db.engine, params={'ticker': request.json['ticker']}, parse_dates=['time'])
             most_recent = new_holding_price['time'][0]
+            # this if statement is checking whether the stock we are adding
+            # a) has an outdated price or
+            # b) does not have a price at all. 
+            # if either of the two conditions are true, then we want to tell the
+            # frontend that we want to update the price of the stock we are trying to add. 
             if most_recent < datetime.date.today() or pd.isnull(most_recent):
-                return("Update Price")
+                api_prices = iex_calls.get_price_data([request.json['ticker']], True, 'intraday')
+                api_prices.to_sql(name='intraday_prices', con = db.engine, index=False, if_exists= 'append')
+                return 'we guddd'
         else:
             print('user_id is none here!')
         
@@ -277,6 +286,7 @@ def holdings():
         
         portfolio = user_portfolio[user_portfolio['quantity'] > 0]
         #print(portfolio)
+        print('user_id is provided here!')
         return portfolio.to_json(orient='index')
     else:
         print('user_id is none here!')
@@ -293,6 +303,7 @@ def prices():
             freq = request.json['freq']
         
             if freq == 'intraday':
+                print(stocks_to_update)
                 for stock in stocks_to_update:
                     api_prices = iex_calls.get_price_data([stock], True, freq)
                     api_prices.to_sql(name='intraday_prices', con = db.engine, index=False, if_exists= 'append')
@@ -304,6 +315,7 @@ def prices():
             print(api_prices)
             #df = pd.read_sql_table('prices', db.engine)
             #print(df)
+            cleanDB()
             return api_prices.to_json(orient='index')
         else:
             print('user_id is none here!')

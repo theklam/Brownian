@@ -4,29 +4,20 @@ import { Form, Col, Button } from 'react-bootstrap';
 export default class UpdatePricesButton extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            ticker: '',
-            quantity: ''
-        };
-        this.fetchPrices = this.fetchPrices.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
 
-    fetchPrices() {
-        let portfolio_stocks = this.props.items.map(a => a.ticker);
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stocks: ['AAPL', 'AGG', 'DIS', 'FB', 'SPY'], freq: 'intraday'})
-        };
-        fetch('/prices', requestOptions)
-            .then(response => this.props.fetchCurrentHoldings());
+
+
+    handleClick() {
+        this.props.fetchPrices(this.props.items.map(a=>a.ticker));
     }
 
     render() {
         return (
             <Form>
                 <Form.Row>
-                    <Button variant="primary" onClick={this.fetchPrices}>
+                    <Button variant="primary" onClick={this.handleClick}>
                         Update Prices
                     </Button>
                 </Form.Row>
