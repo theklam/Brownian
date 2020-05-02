@@ -17,7 +17,7 @@ export default class PortfolioRiskButton extends React.Component {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stocks: portfolio_stocks, freq: 'daily', values: portfolio_values})
+            body: JSON.stringify({ stocks: portfolio_stocks, freq: 'daily', values: portfolio_values })
         };
         fetch('/portfolioRisk', requestOptions)
             .then(response => response.json())
