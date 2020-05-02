@@ -20,7 +20,8 @@ export default class PortfolioRiskButton extends React.Component {
             body: JSON.stringify({ stocks: portfolio_stocks, freq: 'daily', values: portfolio_values})
         };
         fetch('/portfolioRisk', requestOptions)
-            // .then(response => this.props.fetchCurrentHoldings());
+            .then(response => response.json())
+            .then(response => console.log(response));
     }
 
     render() {

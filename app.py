@@ -1,6 +1,7 @@
-from flask import Flask, render_template, g, request
+from flask import Flask, render_template, g, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import iex_calls
+import risk_formulas
 import pandas as pd
 import numpy as np
 import datetime
@@ -329,29 +330,55 @@ def prices():
 def portfolioRisk():
     if request.method == "POST":
         if user_id is not None:
-            stock_list ='(' + ', '.join("'{0}'".format(w) for w in request.json['stocks']) + ')'
-            print(stock_list)
             portfolio_prices = pd.read_sql_query('''select ticker, price, time from {} where time >= ? and time <= :end and ticker in ({});
             '''.format('daily_prices',','.join('?' * len(request.json['stocks']))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + request.json['stocks']) 
             portfolio_prices = portfolio_prices.pivot(index = 'time', columns = 'ticker', values = 'price')
 
-            returns_daily = portfolio_prices.pct_change()
-            log_returns = np.log(1 + returns_daily)
-            returns_annual = returns_daily.mean()*252
-            log_returns_annual = np.exp(252*log_returns.mean())-1
-            cov_daily = log_returns.cov()
-            cov_annual = cov_daily * 252
             values = np.array(request.json['values'])
             weights = values/np.sum(values)
-            returns = np.dot(weights, log_returns_annual)
-            volatility = np.sqrt(np.dot(weights.T, np.dot(cov_annual, weights)))
-            print(returns)
-            print(volatility)
+            mean_returns_annual, cov_annual = risk_formulas.log_hist_returns(portfolio_prices)
+
+            port_hist_returns, port_volatility = risk_formulas.portfolio_annualised_performance(weights, mean_returns_annual, cov_annual)
+            port_hist_sharpe = -1*risk_formulas.neg_sharpe_ratio(weights, mean_returns_annual, cov_annual, 0.01)
+            
+            max_sharpe_weights = risk_formulas.max_sharpe_ratio(mean_returns_annual, cov_annual,  0.01, 0.5)
+            max_sharpe_returns, max_sharpe_vol = risk_formulas.portfolio_annualised_performance(max_sharpe_weights, mean_returns_annual, cov_annual)
+            
+            min_vol_weights = risk_formulas.min_variance(mean_returns_annual, cov_annual, 0.5)
+            min_vol_returns, min_vol = risk_formulas.portfolio_annualised_performance(min_vol_weights, mean_returns_annual, cov_annual)
+            
+
+            return jsonify({
+                "port_hist_returns": port_hist_returns,
+                "port_vol": port_volatility, 
+                "port_hist_sharpe": port_hist_sharpe, 
+                "max_sharpe_weights": max_sharpe_weights.tolist(),
+                "max_sharpe_returns": max_sharpe_returns,
+                "max_sharpe_vol": max_sharpe_vol,
+                "min_vol_weights": min_vol_weights.tolist(),
+                "min_vol_returns": min_vol_returns,
+                "min_vol": min_vol
+            })
         else:
             print('user_id is none here!')
             return {}
     
-    
+@app.route("/optimizePortfolio", methods=["GET","POST"])
+def optimzizePortfolio():
+    if request.method == "POST":
+        if user_id is not None:
+            portfolio_prices = pd.read_sql_query('''select ticker, price, time from {} where time >= ? and time <= :end and ticker in ({});
+            '''.format('daily_prices',','.join('?' * len(request.json['stocks']))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + request.json['stocks']) 
+            portfolio_prices = portfolio_prices.pivot(index = 'time', columns = 'ticker', values = 'price')
+
+            values = np.array(request.json['values'])
+            weights = values/np.sum(values)
+            returns, volatility = risk_formulas.annual_return_and_vol(portfolio_prices, weights)
+            return jsonify({"port_returns":returns,"port_vol": volatility})
+        else:
+            print('user_id is none here!')
+            return {}
+
     
     return {}
 # NO KNOWN BUGS
