@@ -341,23 +341,17 @@ def portfolioRisk():
             port_hist_returns, port_volatility = risk_formulas.portfolio_annualised_performance(weights, mean_returns_annual, cov_annual)
             port_hist_sharpe = -1*risk_formulas.neg_sharpe_ratio(weights, mean_returns_annual, cov_annual, 0.01)
             
-            max_sharpe_weights = risk_formulas.max_sharpe_ratio(mean_returns_annual, cov_annual,  0.01, 0.5)
-            max_sharpe_returns, max_sharpe_vol = risk_formulas.portfolio_annualised_performance(max_sharpe_weights, mean_returns_annual, cov_annual)
+            # max_sharpe_weights = risk_formulas.max_sharpe_ratio(mean_returns_annual, cov_annual,  0.01, 0.5)
+            # max_sharpe_returns, max_sharpe_vol = risk_formulas.portfolio_annualised_performance(max_sharpe_weights, mean_returns_annual, cov_annual)
             
-            min_vol_weights = risk_formulas.min_variance(mean_returns_annual, cov_annual, 0.5)
-            min_vol_returns, min_vol = risk_formulas.portfolio_annualised_performance(min_vol_weights, mean_returns_annual, cov_annual)
+            # min_vol_weights = risk_formulas.min_variance(mean_returns_annual, cov_annual, 0.5)
+            # min_vol_returns, min_vol = risk_formulas.portfolio_annualised_performance(min_vol_weights, mean_returns_annual, cov_annual)
             
 
             return jsonify({
                 "port_hist_returns": port_hist_returns,
                 "port_vol": port_volatility, 
-                "port_hist_sharpe": port_hist_sharpe, 
-                "max_sharpe_weights": max_sharpe_weights.tolist(),
-                "max_sharpe_returns": max_sharpe_returns,
-                "max_sharpe_vol": max_sharpe_vol,
-                "min_vol_weights": min_vol_weights.tolist(),
-                "min_vol_returns": min_vol_returns,
-                "min_vol": min_vol
+                "port_hist_sharpe": port_hist_sharpe
             })
         else:
             print('user_id is none here!')
@@ -373,8 +367,17 @@ def optimzizePortfolio():
 
             values = np.array(request.json['values'])
             weights = values/np.sum(values)
-            returns, volatility = risk_formulas.annual_return_and_vol(portfolio_prices, weights)
-            return jsonify({"port_returns":returns,"port_vol": volatility})
+            mean_returns_annual, cov_annual = risk_formulas.log_hist_returns(portfolio_prices)
+            if request.json['opt_style'] == "max_sharpe":
+                optimized_weights = risk_formulas.max_sharpe_ratio(mean_returns_annual, cov_annual,  0.01, request.json['max_weight'], request.json['max_weight'])
+                optimized_returns, optimized_vol = risk_formulas.portfolio_annualised_performance(optimized_weights, mean_returns_annual, cov_annual)
+            elif request.json['opt_style'] == "min_vol":
+                optimized_weights = risk_formulas.min_variance(mean_returns_annual, cov_annual, request.json['max_weight'], request.json['max_weight'])
+                optimized_returns, optimized_vol = risk_formulas.portfolio_annualised_performance(optimized_weights, mean_returns_annual, cov_annual)
+            else:
+                return {}
+
+            return jsonify({"optimized_weights": optimized_weights.tolist(), "optimized_returns": optimized_returns,"optimized_vol": optimized_vol})
         else:
             print('user_id is none here!')
             return {}
