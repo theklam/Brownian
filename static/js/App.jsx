@@ -21,12 +21,23 @@ export default class App extends React.Component {
       isLoaded: false,
       items: [],
       portfolioViz: [],
-      benchmarkViz: []
+      benchmarkViz: [],
+      portfolioValue: 0
+
     };
     this.fetchCurrentHoldings = this.fetchCurrentHoldings.bind(this);
     this.fetchCurrentPortfolio = this.fetchCurrentPortfolio.bind(this);
     this.fetchCurrentBenchmark = this.fetchCurrentBenchmark.bind(this);
     this.fetchPrices = this.fetchPrices.bind(this);
+    this.getPortfolioValue = this.getPortfolioValue.bind(this);
+  }
+
+  getPortfolioValue(stocks) {
+    let portfolio_values = stocks.map(a => a.total_value);
+    const reducer = (accumulator, currentValue) => accumulator + currentValue; // fancy sum
+    this.setState({
+      portfolioValue: portfolio_values.reduce(reducer)
+    });
   }
 
   fetchCurrentHoldings() {
@@ -34,13 +45,12 @@ export default class App extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
-          console.log('result is: ')
-          console.log(Object.values(result));
-          console.log(typeof(Object.values(result)));
+          let items = Object.values(result);
           this.setState({
             isLoaded: true,
-            items: Object.values(result)
+            items: items
           });
+          this.getPortfolioValue(items);
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow
@@ -59,14 +69,12 @@ export default class App extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
-          console.log(result);
           let tmp = Object.values(result);
           tmp = tmp.map(x => x.values);
           this.setState({
             isLoaded: true,
             portfolioViz: tmp
           });
-          console.log(this.state.portfolioViz);
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow
@@ -93,8 +101,6 @@ export default class App extends React.Component {
             isLoaded: true,
             benchmarkViz: tmp
           });
-          console.log('benchmark processed is: ');
-          console.log(this.state.benchmarkViz);
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow
@@ -111,9 +117,6 @@ export default class App extends React.Component {
   // fetchPrices takes in an array, i.e., [AAPL, TWTR, ...], and updates the prices of said array
   // if no array is provided, then the one that we use is the items array
   fetchPrices(portfolio_stocks) {
-    console.log('in the fetch prices function!~~~~~~');
-    console.log('portfolio_stocks is: ');
-    console.log(typeof(portfolio_stocks));
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -121,8 +124,6 @@ export default class App extends React.Component {
     };
     return fetch('/prices', requestOptions)
       .then(response => {
-        console.log('fetch prices returned successfully!');
-        console.log(response);
         this.fetchCurrentHoldings();
       });
   }
@@ -139,7 +140,7 @@ export default class App extends React.Component {
             <LoginSignUp />
           </Route>
           <Route exact path="/manage">
-            <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} fetchPrices={this.fetchPrices} />
+            <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} fetchPrices={this.fetchPrices} portfolioValue={this.state.portfolioValue}/>
           </Route>
           <Route exact path="/visualize">
             <Visualize fetchCurrentVisualize={this.fetchCurrentPortfolio} visualize={this.state.portfolioViz} title="Portfolio" />

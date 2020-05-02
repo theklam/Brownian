@@ -7,8 +7,15 @@ import {
     Link
 } from "react-router-dom";
 import TickerRow from "./TickerRowComponent";
+import TickerTableTotalPriceRow from "./TickerTableTotalPriceRowComponent";
 
-export default class TickerTableComponent extends React.Component { 
+export default class TickerTableComponent extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+        };
+    }
 
     render() {
         return (
@@ -26,6 +33,7 @@ export default class TickerTableComponent extends React.Component {
                         <TickerRow key={item.ticker}
                             items={item} />
                     )}
+                    <TickerTableTotalPriceRow items={this.props.items} portfolioValue={this.props.portfolioValue}/>
                 </tbody>
             </Table>
         );
