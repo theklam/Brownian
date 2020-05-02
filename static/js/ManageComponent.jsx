@@ -10,6 +10,7 @@ import TickerTable from "./TickerTableComponent";
 import UpdateTickerTableForm from "./UpdateTickerTableFormComponent";
 import UpdatePricesButton from "./UpdatePricesButtonComponent";
 import PortfolioRiskButton from "./PortfolioRiskButtonComponent";
+import OptimizeButton from "./OptimizeButtonComponent";
 
 export default class ManageComponent extends React.Component {
     constructor(props) {
@@ -28,6 +29,7 @@ export default class ManageComponent extends React.Component {
                 <UpdateTickerTableForm fetchCurrentHoldings={this.props.fetchCurrentHoldings} fetchPrices={this.props.fetchPrices}/>
                 <UpdatePricesButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/>
                 <PortfolioRiskButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/>
+                <OptimizeButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/>
             </div>
         );
     }

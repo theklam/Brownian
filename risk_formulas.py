@@ -28,11 +28,11 @@ def neg_sharpe_ratio(weights, mean_returns, cov_matrix, risk_free_rate):
     p_ret, p_var= portfolio_annualised_performance(weights, mean_returns, cov_matrix)
     return -(p_ret - risk_free_rate) / p_var
 
-def max_sharpe_ratio(mean_returns, cov_matrix, risk_free_rate, max_weight):
+def max_sharpe_ratio(mean_returns, cov_matrix, risk_free_rate, min_weight, max_weight):
     num_assets = len(mean_returns)
     args = (mean_returns, cov_matrix, risk_free_rate)
     constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
-    bound = (0.0,max_weight)
+    bound = (min_weight,max_weight)
     bounds = tuple(bound for asset in range(num_assets))
     result = sco.minimize(neg_sharpe_ratio, num_assets*[1./num_assets,], args=args,
                         method='SLSQP', bounds=bounds, constraints=constraints)
@@ -41,11 +41,11 @@ def max_sharpe_ratio(mean_returns, cov_matrix, risk_free_rate, max_weight):
 def portfolio_volatility(weights, mean_returns, cov_matrix):
     return portfolio_annualised_performance(weights, mean_returns, cov_matrix)[1]
 
-def min_variance(mean_returns, cov_matrix, max_weight):
+def min_variance(mean_returns, cov_matrix, min_weight, max_weight):
     num_assets = len(mean_returns)
     args = (mean_returns, cov_matrix)
     constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
-    bound = (0.0,max_weight)
+    bound = (min_weight,max_weight)
     bounds = tuple(bound for asset in range(num_assets))
 
     result = sco.minimize(portfolio_volatility, num_assets*[1./num_assets,], args=args,
