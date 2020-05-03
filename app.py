@@ -142,7 +142,6 @@ def visualize():
         else:
             return "invalid frequency"
         for date in date_list:
-            print(date)
             port_value = get_portfolio_value(date.to_pydatetime()+datetime.timedelta(seconds=1), user_id, freq)
             portfolio_dates.append(date.to_pydatetime())
             portfolio_values.append(port_value['total_value'].sum())
@@ -259,7 +258,7 @@ def holdings():
             new_holding = pd.DataFrame({'user_id':[user_id],'ticker': [request.json['ticker']], 'quantity': [request.json['quantity']], 'time': [datetime.datetime.now()]})
             new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
             new_holding_price = user_portfolio = pd.read_sql_query('''
-            SELECT ticker, price, MAX(time) as time from intraday_prices where ticker = :ticker;
+            SELECT ticker, price, MAX(time) as time from daily_prices where ticker = :ticker;
             ''',db.engine, params={'ticker': request.json['ticker']}, parse_dates=['time'])
             most_recent = new_holding_price['time'][0]
             # this if statement is checking whether the stock we are adding
@@ -268,8 +267,10 @@ def holdings():
             # if either of the two conditions are true, then we want to tell the
             # frontend that we want to update the price of the stock we are trying to add. 
             if most_recent < datetime.date.today() or pd.isnull(most_recent):
-                api_prices = iex_calls.get_price_data([request.json['ticker']], True, 'intraday')
-                api_prices.to_sql(name='intraday_prices', con = db.engine, index=False, if_exists= 'append')
+                api_prices = iex_calls.get_price_data([request.json['ticker']], True, 'yearly')
+                api_prices.rename(columns={"date": "time"}, inplace = True)
+                api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
+                cleanDB()
                 return 'we guddd'
         else:
             print('user_id is none here!')
@@ -280,13 +281,12 @@ def holdings():
     if user_id is not None:
         user_portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
             FROM
-            (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = 1 group by ticker) recent_hold,
-            (SELECT ticker, price, MAX(time) as time from intraday_prices group by ticker) latest_prices
+            (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = :user_id group by ticker) recent_hold,
+            (SELECT ticker, price, MAX(time) as time from daily_prices group by ticker) latest_prices
             WHERE recent_hold.ticker = latest_prices.ticker;
             ''',db.engine, params={'user_id': user_id})
         
         portfolio = user_portfolio[user_portfolio['quantity'] > 0]
-        #print(portfolio)
         print('user_id is provided here!')
         return portfolio.to_json(orient='index')
     else:
@@ -304,18 +304,15 @@ def prices():
             freq = request.json['freq']
         
             if freq == 'intraday':
-                print(stocks_to_update)
                 for stock in stocks_to_update:
                     api_prices = iex_calls.get_price_data([stock], True, freq)
                     api_prices.to_sql(name='intraday_prices', con = db.engine, index=False, if_exists= 'append')
 
             elif freq == 'monthly' or freq == 'yearly':
+                print("prices reached")
                 api_prices = iex_calls.get_price_data(stocks_to_update, True, freq)
+                print(api_prices)
                 api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
-
-            print(api_prices)
-            #df = pd.read_sql_table('prices', db.engine)
-            #print(df)
             cleanDB()
             return api_prices.to_json(orient='index')
         else:
@@ -330,9 +327,13 @@ def prices():
 def portfolioRisk():
     if request.method == "POST":
         if user_id is not None:
+            cleanDB()
             portfolio_prices = pd.read_sql_query('''select ticker, price, time from {} where time >= ? and time <= :end and ticker in ({});
             '''.format('daily_prices',','.join('?' * len(request.json['stocks']))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + request.json['stocks']) 
             portfolio_prices = portfolio_prices.pivot(index = 'time', columns = 'ticker', values = 'price')
+            
+            if portfolio_prices.empty:
+                return {}
 
             values = np.array(request.json['values'])
             weights = values/np.sum(values)
@@ -340,12 +341,6 @@ def portfolioRisk():
 
             port_hist_returns, port_volatility = risk_formulas.portfolio_annualised_performance(weights, mean_returns_annual, cov_annual)
             port_hist_sharpe = -1*risk_formulas.neg_sharpe_ratio(weights, mean_returns_annual, cov_annual, 0.01)
-            
-            # max_sharpe_weights = risk_formulas.max_sharpe_ratio(mean_returns_annual, cov_annual,  0.01, 0.5)
-            # max_sharpe_returns, max_sharpe_vol = risk_formulas.portfolio_annualised_performance(max_sharpe_weights, mean_returns_annual, cov_annual)
-            
-            # min_vol_weights = risk_formulas.min_variance(mean_returns_annual, cov_annual, 0.5)
-            # min_vol_returns, min_vol = risk_formulas.portfolio_annualised_performance(min_vol_weights, mean_returns_annual, cov_annual)
             
 
             return jsonify({
@@ -369,21 +364,44 @@ def optimzizePortfolio():
             weights = values/np.sum(values)
             mean_returns_annual, cov_annual = risk_formulas.log_hist_returns(portfolio_prices)
             if request.json['opt_style'] == "max_sharpe":
-                optimized_weights = risk_formulas.max_sharpe_ratio(mean_returns_annual, cov_annual,  0.01, request.json['max_weight'], request.json['max_weight'])
+                optimized_weights = risk_formulas.max_sharpe_ratio(mean_returns_annual, cov_annual,  0.01, min(1/len(request.json['stocks']),request.json['min_weight']), max(1/len(request.json['stocks']),request.json['max_weight']))
                 optimized_returns, optimized_vol = risk_formulas.portfolio_annualised_performance(optimized_weights, mean_returns_annual, cov_annual)
+                optimized_sharpe = -1*risk_formulas.neg_sharpe_ratio(optimized_weights, mean_returns_annual, cov_annual, 0.01)
+                
             elif request.json['opt_style'] == "min_vol":
-                optimized_weights = risk_formulas.min_variance(mean_returns_annual, cov_annual, request.json['max_weight'], request.json['max_weight'])
+                optimized_weights = risk_formulas.min_variance(mean_returns_annual, cov_annual, min(1/len(request.json['stocks']),request.json['min_weight']), max(1/len(request.json['stocks']),request.json['max_weight']))
                 optimized_returns, optimized_vol = risk_formulas.portfolio_annualised_performance(optimized_weights, mean_returns_annual, cov_annual)
+                optimized_sharpe = -1*risk_formulas.neg_sharpe_ratio(optimized_weights, mean_returns_annual, cov_annual, 0.01)
             else:
                 return {}
 
-            return jsonify({"optimized_weights": optimized_weights.tolist(), "optimized_returns": optimized_returns,"optimized_vol": optimized_vol})
+            return jsonify({"optimized_weights": optimized_weights.tolist(), "optimized_returns": optimized_returns,"optimized_vol": optimized_vol, "optimized_sharpe": optimized_sharpe})
         else:
             print('user_id is none here!')
             return {}
 
     
     return {}
+
+@app.route("/rebalancePortfolio", methods=["GET","POST"])
+def rebalancePortfolio():
+    if request.method == "POST":
+        if user_id is not None:
+            stock_list = request.json['stocks']
+            values = np.array(request.json['values'])
+            portfolio_value = np.sum(values)
+            prices = np.array(request.json['prices'])
+
+            optimized_weights = np.array(request.json['optimizedWeights'])
+            optimized_values = optimized_weights*portfolio_value
+            optimized_shares = optimized_values/prices
+
+            new_holding = pd.DataFrame({'user_id':[user_id]*len(request.json['stocks']),'ticker': request.json['stocks'], 'quantity': optimized_shares.tolist(), 'time': [datetime.datetime.now()]*len(request.json['stocks'])})
+            new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
+            return new_holding.to_json(orient='index')\
+    
+    return {}
+
 # NO KNOWN BUGS
 # TODO potentially try to use the "WITH CTE as (SELECT...)" method as it is faster
 @app.route("/cleanDB")
@@ -405,7 +423,6 @@ def cleanDB():
         GROUP BY ticker, time)
     """)
     
-    print(result)
     return "hi"
 
 

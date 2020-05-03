@@ -120,7 +120,7 @@ export default class App extends React.Component {
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stocks: portfolio_stocks, freq: 'intraday' })
+      body: JSON.stringify({ stocks: portfolio_stocks, freq: 'yearly' })
     };
     return fetch('/prices', requestOptions)
       .then(response => {

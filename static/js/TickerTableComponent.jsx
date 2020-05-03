@@ -1,14 +1,8 @@
 import React from "react";
 import { Table } from 'react-bootstrap';
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link
-} from "react-router-dom";
 import TickerRow from "./TickerRowComponent";
 import TickerTableTotalPriceRow from "./TickerTableTotalPriceRowComponent";
-
+import UpdatePricesButton from "./UpdatePricesButtonComponent";
 export default class TickerTableComponent extends React.Component {
 
     constructor(props) {
@@ -23,7 +17,7 @@ export default class TickerTableComponent extends React.Component {
                 <thead>
                     <tr>
                         <th>Ticker</th>
-                        <th>Price</th>
+                        <th>Price    <UpdatePricesButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/></th>
                         <th>Quantity</th>
                         <th>Value</th>
                     </tr>
