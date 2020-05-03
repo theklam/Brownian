@@ -15,13 +15,9 @@ export default class UpdatePricesButton extends React.Component {
 
     render() {
         return (
-            <Form>
-                <Form.Row>
-                    <Button variant="primary" onClick={this.handleClick}>
-                        Update Prices
-                    </Button>
-                </Form.Row>
-            </Form>
+            <Button variant="primary" onClick={this.handleClick}>
+                Update Prices
+            </Button>
         );
     }
 }

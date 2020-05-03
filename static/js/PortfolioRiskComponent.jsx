@@ -5,11 +5,19 @@ export default class PortfolioRiskButton extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            historicalReturns: 0,
+            historicalVol: 0,
+            historicalSharpe: 0
         };
     }
 
     componentDidMount() {
         this.fetchRisk();
+    }
+    componentDidUpdate(prevProps) {
+        if (this.props.items !== prevProps.items) {
+            this.fetchRisk();
+        }
     }
 
     fetchRisk() {
@@ -22,7 +30,13 @@ export default class PortfolioRiskButton extends React.Component {
         };
         fetch('/portfolioRisk', requestOptions)
             .then(response => response.json())
-            .then(response => console.log(response));
+            .then(response => {
+                this.setState({
+                    historicalReturns: response["port_hist_returns"],
+                    historicalVol: response["port_vol"],
+                    historicalSharpe: response["port_hist_sharpe"]
+                });
+            });
     }
 
     render() {
@@ -30,29 +44,22 @@ export default class PortfolioRiskButton extends React.Component {
             <Table striped bordered hover>
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Username</th>
+                        <th>Statistic</th>
+                        <th>Value</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>1</td>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
+                        <td>Returns</td>
+                        <td>{this.state.historicalReturns}</td>
                     </tr>
                     <tr>
-                        <td>2</td>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
+                        <td>Volatility</td>
+                        <td>{this.state.historicalVol}</td>
                     </tr>
                     <tr>
-                        <td>3</td>
-                        <td colSpan="2">Larry the Bird</td>
-                        <td>@twitter</td>
+                        <td>Sharpe Ratio</td>
+                        <td>{this.state.historicalSharpe}</td>
                     </tr>
                 </tbody>
             </Table>

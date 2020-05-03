@@ -1,11 +1,5 @@
 import React from "react";
 import { Form, Col, Button } from 'react-bootstrap';
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link
-} from "react-router-dom";
 
 export default class UpdateTickerTableForm extends React.Component {
     constructor(props) {
