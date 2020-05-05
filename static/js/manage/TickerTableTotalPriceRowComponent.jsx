@@ -1,6 +1,8 @@
 import React from "react";
 import {Dropdown, DropdownButton} from 'react-bootstrap';
 import ClearHoldingsButton from "./ClearHoldingsButtonComponent";
+import '../../css/manage.css'
+
 export default class TickerTableTotalPriceRowComponent extends React.Component {
     constructor(props) {
         super(props);
@@ -28,7 +30,7 @@ export default class TickerTableTotalPriceRowComponent extends React.Component {
     render() {
         return (
             <tr>
-                <td> <DropdownButton id="dropdown-basic-button" title="Undo Holdings Changes">
+                <td> <DropdownButton className="manageButton" id="dropdown-basic-button" title="Undo Holdings Changes">
                             <Dropdown.Item eventKey="last_change" onSelect={this.handleSelect}>Undo Last Change</Dropdown.Item>
                             <Dropdown.Item eventKey="last_hour" onSelect={this.handleSelect}>Undo Last Hour</Dropdown.Item>
                             <Dropdown.Item eventKey="today" onSelect={this.handleSelect}>Undo Today</Dropdown.Item>

@@ -1,0 +1,25 @@
+.flexContainer{
+    display:flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+
+}
+
+.statTable__header{
+    background-color: 827070;
+    color: White;
+}
+
+
+.manageButton,
+.manageButton button,
+.manageButton:active,
+.manageButton button:active,
+.manageButton:active:hover,
+.manageButton:hover,
+.manageButton button:active:hover,
+.manageButton button:hover {
+    border-color: #827070;
+    background-color: #827070;
+    color: white;
+}

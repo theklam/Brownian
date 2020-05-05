@@ -43,7 +43,7 @@ export default class PortfolioRiskButton extends React.Component {
         return (
             <Table striped bordered hover>
                 <thead>
-                    <tr>
+                    <tr className="statTable__header">
                         <th>Statistic</th>
                         <th>Value</th>
                     </tr>

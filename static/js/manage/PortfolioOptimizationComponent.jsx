@@ -1,6 +1,7 @@
 import React from "react";
 import { Table, Dropdown, Form, Col, DropdownButton } from 'react-bootstrap';
 import OptimizeButton from "./OptimizeButtonComponent";
+import '../../css/manage.css'
 
 
 export default class PortfolioOptimizationComponent extends React.Component {
@@ -94,7 +95,7 @@ export default class PortfolioOptimizationComponent extends React.Component {
             <div>
                 <Table striped bordered hover>
                 <thead>
-                    <tr>
+                    <tr className="statTable__header">
                         <th>Statistic</th>
                         <th>Value</th>
                     </tr>
@@ -122,7 +123,7 @@ export default class PortfolioOptimizationComponent extends React.Component {
                         <Col>
                             <Form.Control placeholder="Maximum Weight" onChange={this.handleChangeMaxWeight} />
                         </Col>
-                        <DropdownButton id="dropdown-basic-button" title="Optimize Portfolio">
+                        <DropdownButton className="manageButton" id="dropdown-basic-button" title="Optimize Portfolio">
                             <Dropdown.Item eventKey="max_sharpe" onSelect={this.handleSelect}>Maximize Sharpe Ratio</Dropdown.Item>
                             <Dropdown.Item eventKey="min_vol" onSelect={this.handleSelect}>Minimize Volatility</Dropdown.Item>
                         </DropdownButton>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from 'react-bootstrap';
+import '../../css/manage.css'
 
 export default class ClearHoldingsButton extends React.Component {
     constructor(props) {
@@ -28,7 +29,7 @@ export default class ClearHoldingsButton extends React.Component {
 
     render() {
         return (
-            <Button variant="primary" onClick={this.handleClick}>
+            <Button className = "manageButton" variant="primary" onClick={this.handleClick}>
                 Clear Holdings
             </Button>
         );

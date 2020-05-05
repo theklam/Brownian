@@ -3,6 +3,7 @@ import { Table } from 'react-bootstrap';
 import TickerRow from "./TickerRowComponent";
 import TickerTableTotalPriceRow from "./TickerTableTotalPriceRowComponent";
 import UpdatePricesButton from "./UpdatePricesButtonComponent";
+import '../../css/manage.css'
 export default class TickerTableComponent extends React.Component {
 
     constructor(props) {
@@ -15,9 +16,9 @@ export default class TickerTableComponent extends React.Component {
         return (
             <Table striped bordered hover>
                 <thead>
-                    <tr>
+                    <tr className="statTable__header"> 
                         <th>Ticker</th>
-                        <th>Price    <UpdatePricesButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/></th>
+                        <th>Price</th>
                         <th>Quantity</th>
                         <th>Value</th>
                     </tr>
@@ -30,6 +31,7 @@ export default class TickerTableComponent extends React.Component {
                     <TickerTableTotalPriceRow items={this.props.items} fetchCurrentHoldings={this.props.fetchCurrentHoldings} portfolioValue={this.props.portfolioValue}/>
                 </tbody>
             </Table>
+            // <UpdatePricesButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/>
         );
     }
 }
