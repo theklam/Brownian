@@ -33,7 +33,7 @@ export default class PortfolioOptimizationComponent extends React.Component {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stocks: portfolio_stocks, freq: 'daily', values: portfolio_values, opt_style: this.state.opt_style, min_weight: this.state.minWeight, max_weight: this.state.maxWeight})
+            body: JSON.stringify({ stocks: portfolio_stocks, freq: 'daily', values: portfolio_values, opt_style: this.state.opt_style, min_weight: this.state.minWeight, max_weight: this.state.maxWeight, userID: window.localStorage.getItem('userID')})
         };
         fetch('/optimizePortfolio', requestOptions)
             .then(response => response.json())
@@ -58,7 +58,7 @@ export default class PortfolioOptimizationComponent extends React.Component {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stocks: portfolio_stocks, freq: 'daily', values: portfolio_values, optimizedWeights: this.state.optimizedWeights, prices: portfolio_prices})
+            body: JSON.stringify({ stocks: portfolio_stocks, freq: 'daily', values: portfolio_values, optimizedWeights: this.state.optimizedWeights, prices: portfolio_prices, userID: window.localStorage.getItem('userID')})
         };
         fetch('/rebalancePortfolio', requestOptions)
             .then(response => response.json())

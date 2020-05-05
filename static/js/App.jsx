@@ -25,6 +25,7 @@ export default class App extends React.Component {
       portfolioValue: 0
 
     };
+    window.localStorage.setItem('userID', '');
     this.fetchCurrentHoldings = this.fetchCurrentHoldings.bind(this);
     this.fetchCurrentPortfolio = this.fetchCurrentPortfolio.bind(this);
     this.fetchCurrentBenchmark = this.fetchCurrentBenchmark.bind(this);
@@ -41,7 +42,12 @@ export default class App extends React.Component {
   }
 
   fetchCurrentHoldings() {
-    fetch("/holdings")
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticker: this.state.ticker, quantity: this.state.quantity, userID: window.localStorage.getItem('userID'), method: 'retrieve'})
+    };
+    fetch("/holdings", requestOptions)
       .then(res => res.json())
       .then(
         (result) => {
@@ -65,7 +71,12 @@ export default class App extends React.Component {
   }
 
   fetchCurrentPortfolio() {
-    return fetch("/visualize")
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({freq:'monthly', userID: window.localStorage.getItem('userID')})
+    };
+    return fetch("/visualize", requestOptions)
       .then(res => res.json())
       .then(
         (result) => {
@@ -89,7 +100,12 @@ export default class App extends React.Component {
   }
 
   fetchCurrentBenchmark() {
-    return fetch("/visualizeBenchmark")
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({freq:'monthly', userID: window.localStorage.getItem('userID')})
+    };
+    return fetch("/visualizeBenchmark", requestOptions)
       .then(res => res.json())
       .then(
         (result) => {
@@ -120,7 +136,7 @@ export default class App extends React.Component {
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stocks: portfolio_stocks, freq: 'yearly' })
+      body: JSON.stringify({ stocks: portfolio_stocks, freq: 'yearly', userID: window.localStorage.getItem('userID') })
     };
     return fetch('/prices', requestOptions)
       .then(response => {
