@@ -1,11 +1,4 @@
 import React from "react";
-import { Table } from 'react-bootstrap';
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link
-} from "react-router-dom";
 
 export default class TickerRowComponent extends React.Component {
     render() {

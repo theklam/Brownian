@@ -1,16 +1,15 @@
 // App.jsx
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import React from "react";
-import Navbar from "./NavbarComponent";
-import LoginSignUp from "./LoginSignUpComponent";
-import Home from "./HomeComponent";
-import Manage from "./ManageComponent";
-import Visualize from "./VisualizeComponent";
+import Navbar from "../navbar/NavbarComponent";
+import LoginSignUp from "../loginsignup/LoginSignUpComponent";
+import Home from "../home/HomeComponent";
+import Manage from "../manage/ManageComponent";
+import Visualize from "../visualize/VisualizeComponent";
 import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
 } from "react-router-dom";
 
 export default class App extends React.Component {

@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, Col, Button } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 
 export default class OptimizeButton extends React.Component {
     constructor(props) {

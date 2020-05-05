@@ -1,5 +1,7 @@
 import React from "react";
 import draw from './helpers.js'
+import '../../css/visualize.css'; // Tell webpack that Button.js uses these styles
+
 
 /**
  * VisualizeComponent takes in fetchCurrentVisualize function in order to re-fetch whatever

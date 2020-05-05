@@ -42,7 +42,7 @@ def get_portfolio_value(datetime, user_id, freq):
         (SELECT ticker, price, MAX(time) as time from {} where time <= :time group by ticker) latest_prices
         WHERE recent_hold.ticker = latest_prices.ticker;
         '''.format(table),db.engine, params = {'user_id':user_id, 'time': datetime})
-    print(portfolio)
+    # print(portfolio)
     return portfolio
 
 def efficient_user_value(opening_time, user_id, freq):    
@@ -132,8 +132,8 @@ def visualize():
         portfolio_dates = []
         portfolio_values = []
         date_list = []
-        print('USER ID IS ~~~~~~~~~~~~~~~~~~~~~~')
-        print(request.json['userID'])
+        # print('USER ID IS ~~~~~~~~~~~~~~~~~~~~~~')
+        # print(request.json['userID'])
         if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             if freq == 'intraday':
@@ -150,7 +150,7 @@ def visualize():
             portfolio_history = pd.DataFrame({'dates':portfolio_dates, 'values': portfolio_values})
             return portfolio_history.to_json(orient='index')
         else:
-            print('user_id is none here!')
+            # print('user_id is none here!')
             return {}
 
 # TODO Add in functionality for intraday prices
@@ -164,10 +164,10 @@ def visualizeTest():
         freq = 'intraday'
         if user_id is not None:
             portfolio_history = efficient_user_value(trading_dates.market_open[-1].to_pydatetime(), user_id, freq)
-            print(datetime.datetime.now() - timer)
+            # print(datetime.datetime.now() - timer)
             return portfolio_history.to_json(orient='index')
         else:
-            print('user_id is none here!')
+            # print('user_id is none here!')
             return {}
 
 # TODO add in functionality for intraday prices
@@ -207,7 +207,7 @@ def visualizeBenchmark():
             df['price'] = df['price']*initial_port['total_value'].sum()/df['price'][0]
             return df.to_json(orient='index')
         else:
-            print('user_id is none here!')
+            # print('user_id is none here!')
             return {}
 
 # TODO route to homepage if signup successful and display error message if not
@@ -314,7 +314,7 @@ def prices():
             elif freq == 'monthly' or freq == 'yearly':
                 print("prices reached")
                 api_prices = iex_calls.get_price_data(stocks_to_update, True, freq)
-                print(api_prices)
+                # print(api_prices)
                 api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
             cleanDB()
             return api_prices.to_json(orient='index')

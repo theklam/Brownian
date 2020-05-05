@@ -1,11 +1,5 @@
 import React from "react";
 import { Navbar, Nav, NavDropdown, Form, FormControl, Button } from 'react-bootstrap';
-import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link
-} from "react-router-dom";
 import { LinkContainer } from 'react-router-bootstrap';
 
 export default class NavbarComponent extends React.Component {

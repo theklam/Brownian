@@ -1,5 +1,5 @@
 import React from "react";
-import {Dropdown, DropdownButton, ResponsiveEmbed} from 'react-bootstrap';
+import {Dropdown, DropdownButton} from 'react-bootstrap';
 import ClearHoldingsButton from "./ClearHoldingsButtonComponent";
 export default class TickerTableTotalPriceRowComponent extends React.Component {
     constructor(props) {
