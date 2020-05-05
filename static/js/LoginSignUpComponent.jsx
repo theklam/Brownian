@@ -37,7 +37,23 @@ export default class LoginSignUpComponent extends React.Component {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: this.state.username, password: this.state.password })
         };
-        fetch('/login', requestOptions);
+        fetch('/login', requestOptions)
+            .then(res => res.text())
+            .then(
+                (result) => {
+                    window.localStorage.setItem('userID', result);
+                    console.log(window.localStorage.getItem('userID'))
+                },
+                // Note: it's important to handle errors here
+                // instead of a catch() block so that we don't swallow
+                // exceptions from actual bugs in components.
+                (error) => {
+                    this.setState({
+                        isLoaded: true,
+                        error
+                    });
+                }
+            )
     }
 
     handleSignup(e) {

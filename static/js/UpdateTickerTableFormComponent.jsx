@@ -26,7 +26,7 @@ export default class UpdateTickerTableForm extends React.Component {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ticker: this.state.ticker, quantity: this.state.quantity })
+            body: JSON.stringify({ ticker: this.state.ticker, quantity: this.state.quantity, userID: window.localStorage.getItem('userID'), method: 'store'})
         };
         fetch('/holdings', requestOptions)
             .then(res => res.text())

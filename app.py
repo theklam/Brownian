@@ -1,21 +1,21 @@
 from flask import Flask, render_template, g, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 import iex_calls
 import risk_formulas
 import pandas as pd
 import numpy as np
 import datetime
 import pandas_market_calendars as mcal
+
 app = Flask(__name__, static_folder="static/dist", template_folder="static")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///risk_testing.sqlite3'
 
 db = SQLAlchemy(app)
-user_id = 1
+bcrypt = Bcrypt(app)
+
 # Helper function that returns the sqlite database
 def get_db():
     db = getattr(g, '_database', None)
@@ -119,125 +119,127 @@ class risk_stats(db.Model):
 
 @app.route("/")
 def index():
-    print(user_id)
     return render_template("index.html")
 
 # TODO Add in functionality for intraday prices
-@app.route("/visualize")
+@app.route("/visualize", methods=["POST"])
 def visualize():
-    timer = datetime.datetime.now()
-    nyse = mcal.get_calendar('NYSE')
-    today = datetime.date.today()
-    trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
-    freq = 'monthly'
-    portfolio_dates = []
-    portfolio_values = []
-    date_list = []
-    
-    if user_id is not None:
-        if freq == 'intraday':
-            date_list = [trading_dates.market_open[-1] + datetime.timedelta(minutes=5*x) for x in range(0, 79)]
-        elif freq == 'monthly':
-            date_list = trading_dates.market_close
-        else:
-            return "invalid frequency"
-        for date in date_list:
-            port_value = get_portfolio_value(date.to_pydatetime()+datetime.timedelta(seconds=1), user_id, freq)
-            portfolio_dates.append(date.to_pydatetime())
-            portfolio_values.append(port_value['total_value'].sum())
+    if request.method == "POST":
+        nyse = mcal.get_calendar('NYSE')
+        today = datetime.date.today()
+        trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
+        freq = request.json['freq']
+        portfolio_dates = []
+        portfolio_values = []
+        date_list = []
+        
+        if request.json['userID'] != '':
+            user_id = int(request.json['userID'])
+            if freq == 'intraday':
+                date_list = [trading_dates.market_open[-1] + datetime.timedelta(minutes=5*x) for x in range(0, 79)]
+            elif freq == 'monthly':
+                date_list = trading_dates.market_close
+            else:
+                return "invalid frequency"
+            for date in date_list:
+                port_value = get_portfolio_value(date.to_pydatetime()+datetime.timedelta(seconds=1), user_id, freq)
+                portfolio_dates.append(date.to_pydatetime())
+                portfolio_values.append(port_value['total_value'].sum())
 
-        portfolio_history = pd.DataFrame({'dates':portfolio_dates, 'values': portfolio_values})
-        print(datetime.datetime.now() - timer)
-        return portfolio_history.to_json(orient='index')
-    else:
-        print('user_id is none here!')
-        return {}
+            portfolio_history = pd.DataFrame({'dates':portfolio_dates, 'values': portfolio_values})
+            return portfolio_history.to_json(orient='index')
+        else:
+            print('user_id is none here!')
+            return {}
 
 # TODO Add in functionality for intraday prices
-@app.route("/visualizeTest")
+@app.route("/visualizeTest", methods=["POST"])
 def visualizeTest():
-    timer = datetime.datetime.now()
-    nyse = mcal.get_calendar('NYSE')
-    today = datetime.date.today()
-    trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
-    freq = 'intraday'
-    if user_id is not None:
-        portfolio_history = efficient_user_value(trading_dates.market_open[-1].to_pydatetime(), user_id, freq)
-        print(datetime.datetime.now() - timer)
-        return portfolio_history.to_json(orient='index')
-    else:
-        print('user_id is none here!')
-        return {}
+    if request.method == "POST":
+        timer = datetime.datetime.now()
+        nyse = mcal.get_calendar('NYSE')
+        today = datetime.date.today()
+        trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
+        freq = 'intraday'
+        if user_id is not None:
+            portfolio_history = efficient_user_value(trading_dates.market_open[-1].to_pydatetime(), user_id, freq)
+            print(datetime.datetime.now() - timer)
+            return portfolio_history.to_json(orient='index')
+        else:
+            print('user_id is none here!')
+            return {}
 
 # TODO add in functionality for intraday prices
 # TODO be able to choose different benchmarks
 # TODO potentially make the database queries more robust to time zone differences. Would need to sit down and think theoretically about most efficient db / api setup
-@app.route("/visualizeBenchmark")
+@app.route("/visualizeBenchmark", methods=["POST"])
 def visualizeBenchmark():
-    # code for just the benchmark's raw price
-    benchmark = 'SPY'
-    nyse = mcal.get_calendar('NYSE')
-    today = datetime.date.today()
-    trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
-    freq = 'monthly'
-    initial_port = pd.DataFrame
-    
-    if user_id is not None:
-        if freq == 'intraday':
-            print(trading_dates.market_open[-1].to_pydatetime())
-            df = pd.read_sql_query(''' SELECT time, price from intraday_prices
-            WHERE ticker = :ticker
-            AND time >= :start
-            ''', db.engine, params={'ticker': benchmark, 'start':trading_dates.index[-1].to_pydatetime()})
-            initial_port = get_portfolio_value(trading_dates.market_open[-1].to_pydatetime()+datetime.timedelta(seconds=1), user_id, 'intraday')
-        elif freq == 'monthly':
-            print(trading_dates)
-            df = pd.read_sql_query(''' SELECT time, price from daily_prices
-            WHERE ticker = :ticker
-            AND time >= :start
-            AND time <= :end
-            ''', db.engine, params={'ticker': benchmark, 'start':trading_dates.index[0].to_pydatetime(), 'end':trading_dates.index[-1].to_pydatetime()})
-            # code to track portfolio value if you invested portfolio value into benchmark 
-            initial_port = get_portfolio_value(trading_dates.market_close[0].to_pydatetime(), user_id, 'monthly')
+    if request.method == "POST":
+        # code for just the benchmark's raw price
+        benchmark = 'SPY'
+        nyse = mcal.get_calendar('NYSE')
+        today = datetime.date.today()
+        trading_dates = nyse.schedule(start_date=iex_calls.month_before(today), end_date=today)
+        freq = request.json['freq']
+        initial_port = pd.DataFrame
         
+        if request.json['userID'] != '':
+            user_id = int(request.json['userID'])
+            if freq == 'intraday':
+                df = pd.read_sql_query(''' SELECT time, price from intraday_prices
+                WHERE ticker = :ticker
+                AND time >= :start
+                ''', db.engine, params={'ticker': benchmark, 'start':trading_dates.index[-1].to_pydatetime()})
+                initial_port = get_portfolio_value(trading_dates.market_open[-1].to_pydatetime()+datetime.timedelta(seconds=1), user_id, 'intraday')
+            elif freq == 'monthly':
+                df = pd.read_sql_query(''' SELECT time, price from daily_prices
+                WHERE ticker = :ticker
+                AND time >= :start
+                AND time <= :end
+                ''', db.engine, params={'ticker': benchmark, 'start':trading_dates.index[0].to_pydatetime(), 'end':trading_dates.index[-1].to_pydatetime()})
+                # code to track portfolio value if you invested portfolio value into benchmark 
+                initial_port = get_portfolio_value(trading_dates.market_close[0].to_pydatetime(), user_id, 'monthly')
+            
 
-        if df.empty:
+            if df.empty:
+                return {}
+            df['price'] = df['price']*initial_port['total_value'].sum()/df['price'][0]
+            return df.to_json(orient='index')
+        else:
+            print('user_id is none here!')
             return {}
-        df['price'] = df['price']*initial_port['total_value'].sum()/df['price'][0]
-        return df.to_json(orient='index')
-    else:
-        print('user_id is none here!')
-        return {}
 
 # TODO route to homepage if signup successful and display error message if not
-@app.route("/login", methods=["GET","POST"])
+@app.route("/login", methods=["POST"])
 def login():
     if request.method == "POST":
-        global user_id
-        login_info = pd.read_sql_query('''SELECT id 
-        FROM user_account 
-        WHERE user_name = :username 
-        AND password = :password''', db.engine, params = {'username': request.json['username'], 'password':request.json['password']})
-        if login_info.empty:
-            print("invalid password or username")
+        login_info = pd.read_sql_query('''SELECT password
+            FROM user_account 
+            WHERE user_name = :username''', db.engine, params = {'username': request.json['username']})
+        pw_hash = login_info['password'][0]
+        if bcrypt.check_password_hash(pw_hash,request.json['password'].encode('utf-8')):
+            login_id = pd.read_sql_query('''SELECT id 
+            FROM user_account 
+            WHERE user_name = :username''', db.engine, params = {'username': request.json['username']})
+            return str(login_id['id'][0])
         else:
-            user_id = int(login_info['id'][0])
-        print(user_id)
+            print("invalid password or username")
+            return ''
         return 'logged in'
 
 # TODO route to homepage if signup successful and display error message if not
 @app.route("/logout", methods=["GET"])
 def logout():
     if request.method == "GET":
-        global user_id
-        user_id = None
         print('user_id is now none')
         return 'log out done'
 
 @app.route("/signup", methods=["GET","POST"])
 def signup():
     if request.method == "POST":
-        new_user = pd.DataFrame({'user_name': [request.json['username']], 'password': [request.json['password']]})
+        pw_hash = bcrypt.generate_password_hash(request.json['password'].encode('utf-8')).decode('utf-8')
+        print(pw_hash)
+        new_user = pd.DataFrame({'user_name': [request.json['username']], 'password': [pw_hash]})
         new_user.to_sql(name='user_account', con = db.engine, index=False, if_exists= 'append')
         return 'signup done'
 
@@ -254,44 +256,43 @@ def holdings():
         # if removing some with direct quantity input:
         #   request.params = {ticker: 'FB', quantity: new FB.quantity - old FB.quantity, } 
         #
-        if user_id is not None:
-            new_holding = pd.DataFrame({'user_id':[user_id],'ticker': [request.json['ticker']], 'quantity': [request.json['quantity']], 'time': [datetime.datetime.now()]})
-            new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
-            new_holding_price = user_portfolio = pd.read_sql_query('''
-            SELECT ticker, price, MAX(time) as time from daily_prices where ticker = :ticker;
-            ''',db.engine, params={'ticker': request.json['ticker']}, parse_dates=['time'])
-            most_recent = new_holding_price['time'][0]
-            # this if statement is checking whether the stock we are adding
-            # a) has an outdated price or
-            # b) does not have a price at all. 
-            # if either of the two conditions are true, then we want to tell the
-            # frontend that we want to update the price of the stock we are trying to add. 
-            if most_recent < datetime.date.today() or pd.isnull(most_recent):
-                api_prices = iex_calls.get_price_data([request.json['ticker']], True, 'yearly')
-                api_prices.rename(columns={"date": "time"}, inplace = True)
-                api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
-                cleanDB()
-                return 'we guddd'
+
+        
+        if request.json['userID'] != '':
+            user_id = int(request.json['userID'])
+            if request.json['method'] == "store":
+                
+                new_holding = pd.DataFrame({'user_id':[user_id],'ticker': [request.json['ticker']], 'quantity': [request.json['quantity']], 'time': [datetime.datetime.now()]})
+                new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
+                new_holding_price = user_portfolio = pd.read_sql_query('''
+                SELECT ticker, price, MAX(time) as time from daily_prices where ticker = :ticker;
+                ''',db.engine, params={'ticker': request.json['ticker']}, parse_dates=['time'])
+                most_recent = new_holding_price['time'][0]
+                # this if statement is checking whether the stock we are adding
+                # a) has an outdated price or
+                # b) does not have a price at all. 
+                # if either of the two conditions are true, then we want to tell the
+                # frontend that we want to update the price of the stock we are trying to add. 
+                if most_recent < datetime.date.today() or pd.isnull(most_recent):
+                    api_prices = iex_calls.get_price_data([request.json['ticker']], True, 'yearly')
+                    api_prices.rename(columns={"date": "time"}, inplace = True)
+                    api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
+                    cleanDB()
+                    return 'we guddd'
+            elif request.json['method'] == "retrieve":
+                user_portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
+                FROM
+                (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = :user_id group by ticker) recent_hold,
+                (SELECT ticker, price, MAX(time) as time from daily_prices group by ticker) latest_prices
+                WHERE recent_hold.ticker = latest_prices.ticker;
+                ''',db.engine, params={'user_id': user_id})
+            
+                portfolio = user_portfolio[user_portfolio['quantity'] > 0]
+                print('user_id is provided here!')
+                return portfolio.to_json(orient='index')
         else:
             print('user_id is none here!')
-        
-        return {}
-
-    # TODO: change 'where user_id = 1' to 'where user_id = config.userid' or equivalent
-    if user_id is not None:
-        user_portfolio = pd.read_sql_query('''SELECT recent_hold.ticker, recent_hold.quantity, latest_prices.price, latest_prices.time, recent_hold.quantity*latest_prices.price as total_value
-            FROM
-            (SELECT user_id, ticker, quantity, MAX(time) from holdings where user_id = :user_id group by ticker) recent_hold,
-            (SELECT ticker, price, MAX(time) as time from daily_prices group by ticker) latest_prices
-            WHERE recent_hold.ticker = latest_prices.ticker;
-            ''',db.engine, params={'user_id': user_id})
-        
-        portfolio = user_portfolio[user_portfolio['quantity'] > 0]
-        print('user_id is provided here!')
-        return portfolio.to_json(orient='index')
-    else:
-        print('user_id is none here!')
-        return {}
+            return {}
     
 # NO KNOWN BUGS
 # TODO change it to post endpoint where you can pass in a list of stocks to update and the frequency
@@ -299,7 +300,8 @@ def holdings():
 @app.route("/prices", methods=["GET","POST"])
 def prices():
     if request.method == "POST":
-        if user_id is not None:
+        if request.json['userID'] != '':
+            user_id = int(request.json['userID'])
             stocks_to_update = request.json['stocks']
             freq = request.json['freq']
         
@@ -326,7 +328,8 @@ def prices():
 @app.route("/portfolioRisk", methods=["GET","POST"])
 def portfolioRisk():
     if request.method == "POST":
-        if user_id is not None:
+        if request.json['userID'] != '':
+            user_id = int(request.json['userID'])
             cleanDB()
             portfolio_prices = pd.read_sql_query('''select ticker, price, time from {} where time >= ? and time <= :end and ticker in ({});
             '''.format('daily_prices',','.join('?' * len(request.json['stocks']))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + request.json['stocks']) 
@@ -355,7 +358,8 @@ def portfolioRisk():
 @app.route("/optimizePortfolio", methods=["GET","POST"])
 def optimzizePortfolio():
     if request.method == "POST":
-        if user_id is not None:
+        if request.json['userID'] != '':
+            user_id = int(request.json['userID'])
             portfolio_prices = pd.read_sql_query('''select ticker, price, time from {} where time >= ? and time <= :end and ticker in ({});
             '''.format('daily_prices',','.join('?' * len(request.json['stocks']))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + request.json['stocks']) 
             portfolio_prices = portfolio_prices.pivot(index = 'time', columns = 'ticker', values = 'price')
@@ -386,7 +390,8 @@ def optimzizePortfolio():
 @app.route("/rebalancePortfolio", methods=["GET","POST"])
 def rebalancePortfolio():
     if request.method == "POST":
-        if user_id is not None:
+        if request.json['userID'] != '':
+            user_id = int(request.json['userID'])
             stock_list = request.json['stocks']
             values = np.array(request.json['values'])
             portfolio_value = np.sum(values)
