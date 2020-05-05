@@ -11,6 +11,7 @@ import {
   Switch,
   Route,
 } from "react-router-dom";
+import PrivateRoute from "../routing/PrivateRouteComponent";
 
 export default class App extends React.Component {
 
@@ -44,7 +45,7 @@ export default class App extends React.Component {
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ticker: this.state.ticker, quantity: this.state.quantity, userID: window.localStorage.getItem('userID'), method: 'retrieve'})
+      body: JSON.stringify({ ticker: this.state.ticker, quantity: this.state.quantity, userID: window.localStorage.getItem('userID'), method: 'retrieve' })
     };
     fetch("/holdings", requestOptions)
       .then(res => res.json())
@@ -55,14 +56,14 @@ export default class App extends React.Component {
             isLoaded: true,
             items: items
           });
-          if (this.state.items.length >0){
+          if (this.state.items.length > 0) {
             this.getPortfolioValue(items);
           } else {
             this.setState({
               portfolioValue: 0
             });
           }
-          
+
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow
@@ -80,7 +81,7 @@ export default class App extends React.Component {
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({freq:'monthly', userID: window.localStorage.getItem('userID')})
+      body: JSON.stringify({ freq: 'monthly', userID: window.localStorage.getItem('userID') })
     };
     return fetch("/visualize", requestOptions)
       .then(res => res.json())
@@ -109,7 +110,7 @@ export default class App extends React.Component {
     const requestOptions = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({freq:'monthly', userID: window.localStorage.getItem('userID')})
+      body: JSON.stringify({ freq: 'monthly', userID: window.localStorage.getItem('userID') })
     };
     return fetch("/visualizeBenchmark", requestOptions)
       .then(res => res.json())
@@ -161,13 +162,13 @@ export default class App extends React.Component {
           <Route exact path="/loginsignup">
             <LoginSignUp />
           </Route>
-          <Route exact path="/manage">
-            <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} fetchPrices={this.fetchPrices} portfolioValue={this.state.portfolioValue}/>
-          </Route>
-          <Route exact path="/visualize">
+          <PrivateRoute exact path="/manage">
+              <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} fetchPrices={this.fetchPrices} portfolioValue={this.state.portfolioValue} />
+          </PrivateRoute>
+          <PrivateRoute exact path="/visualize">
             <Visualize fetchCurrentVisualize={this.fetchCurrentPortfolio} visualize={this.state.portfolioViz} title="Portfolio" />
             <Visualize fetchCurrentVisualize={this.fetchCurrentBenchmark} visualize={this.state.benchmarkViz} title="Benchmark" />
-          </Route>
+          </PrivateRoute>
         </Switch>
       </Router>
     );

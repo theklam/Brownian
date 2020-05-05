@@ -13,6 +13,7 @@ export default class LoginSignUpComponent extends React.Component {
         this.handleChangePassword = this.handleChangePassword.bind(this);
         this.handleLogin = this.handleLogin.bind(this);
         this.handleSignup = this.handleSignup.bind(this);
+        console.log(window.localStorage.getItem('userID'));
     }
 
     handleChangeUsername(event) {
