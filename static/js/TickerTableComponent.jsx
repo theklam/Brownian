@@ -27,7 +27,7 @@ export default class TickerTableComponent extends React.Component {
                         <TickerRow key={item.ticker}
                             items={item} />
                     )}
-                    <TickerTableTotalPriceRow items={this.props.items} portfolioValue={this.props.portfolioValue}/>
+                    <TickerTableTotalPriceRow items={this.props.items} fetchCurrentHoldings={this.props.fetchCurrentHoldings} portfolioValue={this.props.portfolioValue}/>
                 </tbody>
             </Table>
         );

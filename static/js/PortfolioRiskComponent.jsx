@@ -51,11 +51,11 @@ export default class PortfolioRiskButton extends React.Component {
                 <tbody>
                     <tr>
                         <td>Returns</td>
-                        <td>{this.state.historicalReturns}</td>
+                        <td>{parseFloat(this.state.historicalReturns*100).toFixed(2)+"%"}</td>
                     </tr>
                     <tr>
                         <td>Volatility</td>
-                        <td>{this.state.historicalVol}</td>
+                        <td>{parseFloat(this.state.historicalVol*100).toFixed(2)+"%"}</td>
                     </tr>
                     <tr>
                         <td>Sharpe Ratio</td>

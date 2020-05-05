@@ -227,12 +227,12 @@ def login():
             return ''
         return 'logged in'
 
-# TODO route to homepage if signup successful and display error message if not
-@app.route("/logout", methods=["GET"])
-def logout():
-    if request.method == "GET":
-        print('user_id is now none')
-        return 'log out done'
+# # TODO route to homepage if signup successful and display error message if not
+# @app.route("/logout", methods=["GET"])
+# def logout():
+#     if request.method == "GET":
+#         print('user_id is now none')
+#         return 'log out done'
 
 @app.route("/signup", methods=["GET","POST"])
 def signup():
@@ -387,7 +387,7 @@ def optimzizePortfolio():
     
     return {}
 
-@app.route("/rebalancePortfolio", methods=["GET","POST"])
+@app.route("/rebalancePortfolio", methods=["POST"])
 def rebalancePortfolio():
     if request.method == "POST":
         if request.json['userID'] != '':
@@ -403,9 +403,51 @@ def rebalancePortfolio():
 
             new_holding = pd.DataFrame({'user_id':[user_id]*len(request.json['stocks']),'ticker': request.json['stocks'], 'quantity': optimized_shares.tolist(), 'time': [datetime.datetime.now()]*len(request.json['stocks'])})
             new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
-            return new_holding.to_json(orient='index')\
+            return new_holding.to_json(orient='index')
     
     return {}
+
+@app.route("/clearHoldings", methods=["POST"])
+def clearHoldings():
+    if request.method == "POST":
+        if request.json['userID'] != '':
+            user_id = int(request.json['userID'])
+            stock_list = request.json['stocks']
+
+            new_holding = pd.DataFrame({'user_id':[user_id]*len(request.json['stocks']),'ticker': request.json['stocks'], 'quantity': 0, 'time': [datetime.datetime.now()]*len(request.json['stocks'])})
+            new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
+            return new_holding.to_json(orient='index')
+    
+    return {}
+
+@app.route("/undoPortfolioChanges", methods=["POST"])
+def undoPortfolioChanges():
+    if request.method == "POST":
+        if request.json['userID'] != '':
+            user_id = int(request.json['userID'])
+            if request.json['timeFrame'] == 'last_change':
+                result = db.engine.execute("""
+                DELETE FROM holdings 
+                WHERE user_id = :user_id 
+                AND time >= :time
+                AND time = (SELECT MAX(time) FROM holdings WHERE user_id = :user_id);
+                """, {'user_id': user_id, 'time':datetime.date.today()})
+            elif request.json['timeFrame'] == 'last_hour':
+                result = db.engine.execute("""
+                DELETE FROM holdings 
+                WHERE user_id = :user_id 
+                AND time >= :time;
+                """, {'user_id': user_id, 'time':datetime.datetime.now()-datetime.timedelta(hours=1)})
+            elif request.json['timeFrame'] == 'today':
+                result = db.engine.execute("""
+                DELETE FROM holdings 
+                WHERE user_id = :user_id 
+                AND time >= :time;
+                """, {'user_id': user_id, 'time':datetime.date.today()})
+            else:
+                return "invalid time frame"
+            return "successfully undone"
+    return ''
 
 # NO KNOWN BUGS
 # TODO potentially try to use the "WITH CTE as (SELECT...)" method as it is faster

@@ -102,11 +102,11 @@ export default class PortfolioOptimizationComponent extends React.Component {
                 <tbody>
                     <tr>
                         <td>Optimized Returns</td>
-                        <td>{this.state.optimizedReturns}</td>
+                        <td>{parseFloat(this.state.optimizedReturns*100).toFixed(2)+"%"}</td>
                     </tr>
                     <tr>
                         <td>Optimized Volatility</td>
-                        <td>{this.state.optimizedVol}</td>
+                        <td>{parseFloat(this.state.optimizedVol*100).toFixed(2)+"%"}</td>
                     </tr>
                     <tr>
                         <td>Optimized Sharpe Ratio</td>
