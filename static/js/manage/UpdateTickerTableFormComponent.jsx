@@ -55,7 +55,7 @@ export default class UpdateTickerTableForm extends React.Component {
                     <Col>
                         <Form.Control placeholder="Quantity" onChange={this.handleChangeQuantity} />
                     </Col>
-                    <Button variant="primary" onClick={this.postNewStock}>
+                    <Button className="manageButton" variant="primary" onClick={this.postNewStock}>
                         Add Stonk
                     </Button>
                 </Form.Row>
