@@ -132,8 +132,9 @@ def visualize():
         portfolio_dates = []
         portfolio_values = []
         date_list = []
-        
-        if request.json['userID'] != '':
+        print('USER ID IS ~~~~~~~~~~~~~~~~~~~~~~')
+        print(request.json['userID'])
+        if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             if freq == 'intraday':
                 date_list = [trading_dates.market_open[-1] + datetime.timedelta(minutes=5*x) for x in range(0, 79)]
@@ -183,7 +184,7 @@ def visualizeBenchmark():
         freq = request.json['freq']
         initial_port = pd.DataFrame
         
-        if request.json['userID'] != '':
+        if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             if freq == 'intraday':
                 df = pd.read_sql_query(''' SELECT time, price from intraday_prices
@@ -258,7 +259,7 @@ def holdings():
         #
 
         
-        if request.json['userID'] != '':
+        if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             if request.json['method'] == "store":
                 
@@ -300,7 +301,7 @@ def holdings():
 @app.route("/prices", methods=["GET","POST"])
 def prices():
     if request.method == "POST":
-        if request.json['userID'] != '':
+        if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             stocks_to_update = request.json['stocks']
             freq = request.json['freq']
@@ -328,7 +329,7 @@ def prices():
 @app.route("/portfolioRisk", methods=["GET","POST"])
 def portfolioRisk():
     if request.method == "POST":
-        if request.json['userID'] != '':
+        if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             cleanDB()
             portfolio_prices = pd.read_sql_query('''select ticker, price, time from {} where time >= ? and time <= :end and ticker in ({});
@@ -358,7 +359,7 @@ def portfolioRisk():
 @app.route("/optimizePortfolio", methods=["GET","POST"])
 def optimzizePortfolio():
     if request.method == "POST":
-        if request.json['userID'] != '':
+        if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             portfolio_prices = pd.read_sql_query('''select ticker, price, time from {} where time >= ? and time <= :end and ticker in ({});
             '''.format('daily_prices',','.join('?' * len(request.json['stocks']))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + request.json['stocks']) 
@@ -390,7 +391,7 @@ def optimzizePortfolio():
 @app.route("/rebalancePortfolio", methods=["POST"])
 def rebalancePortfolio():
     if request.method == "POST":
-        if request.json['userID'] != '':
+        if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             stock_list = request.json['stocks']
             values = np.array(request.json['values'])
@@ -410,7 +411,7 @@ def rebalancePortfolio():
 @app.route("/clearHoldings", methods=["POST"])
 def clearHoldings():
     if request.method == "POST":
-        if request.json['userID'] != '':
+        if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             stock_list = request.json['stocks']
 
@@ -423,7 +424,7 @@ def clearHoldings():
 @app.route("/undoPortfolioChanges", methods=["POST"])
 def undoPortfolioChanges():
     if request.method == "POST":
-        if request.json['userID'] != '':
+        if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             if request.json['timeFrame'] == 'last_change':
                 result = db.engine.execute("""
