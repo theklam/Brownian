@@ -1,12 +1,16 @@
 import React from "react";
 import { Form, Button } from 'react-bootstrap';
+import {
+    Redirect
+} from "react-router-dom";
 
 export default class LoginSignUpComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             username: '',
-            password: ''
+            password: '',
+            toManage: false
         };
 
         this.handleChangeUsername = this.handleChangeUsername.bind(this);
@@ -24,6 +28,7 @@ export default class LoginSignUpComponent extends React.Component {
         this.setState({ password: event.target.value });
     }
 
+
     handleLogin(e) {
         console.log('The signup link was clicked.');
 
@@ -36,8 +41,19 @@ export default class LoginSignUpComponent extends React.Component {
             .then(res => res.text())
             .then(
                 (result) => {
-                    window.localStorage.setItem('userID', result);
-                    console.log(window.localStorage.getItem('userID'))
+                    console.log('here');
+                    // failed!
+                    if (result == '') {
+                        console.log('wrong username or password');
+                    }
+                    else {
+                        console.log('logged in!');
+                        window.localStorage.setItem('userID', result);
+                        console.log(window.localStorage.getItem('userID'))
+                        this.setState({
+                            toManage: true
+                        });
+                    }
                 },
                 // Note: it's important to handle errors here
                 // instead of a catch() block so that we don't swallow
@@ -65,6 +81,9 @@ export default class LoginSignUpComponent extends React.Component {
 
 
     render() {
+        if (this.state.toManage === true) {
+            return <Redirect to='/manage' />
+        }
         return (
             <Form>
                 <Form.Group controlId="formBasicEmail">
