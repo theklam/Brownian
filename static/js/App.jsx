@@ -25,7 +25,7 @@ export default class App extends React.Component {
       portfolioValue: 0
 
     };
-    window.localStorage.setItem('userID', '');
+    // window.localStorage.setItem('userID', '');
     this.fetchCurrentHoldings = this.fetchCurrentHoldings.bind(this);
     this.fetchCurrentPortfolio = this.fetchCurrentPortfolio.bind(this);
     this.fetchCurrentBenchmark = this.fetchCurrentBenchmark.bind(this);
@@ -56,7 +56,14 @@ export default class App extends React.Component {
             isLoaded: true,
             items: items
           });
-          this.getPortfolioValue(items);
+          if (this.state.items.length >0){
+            this.getPortfolioValue(items);
+          } else {
+            this.setState({
+              portfolioValue: 0
+            });
+          }
+          
         },
         // Note: it's important to handle errors here
         // instead of a catch() block so that we don't swallow

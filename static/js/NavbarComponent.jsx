@@ -19,11 +19,8 @@ export default class NavbarComponent extends React.Component {
     }
 
     handleLogout() {
-        fetch("/logout")
-            .then(response => {
-                this.props.fetchCurrentHoldings()
-                window.localStorage.setItem('userID', '');
-            });
+        window.localStorage.setItem('userID', '');
+        this.props.fetchCurrentHoldings()
     }
 
     render() {
