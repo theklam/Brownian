@@ -3,6 +3,8 @@ import { Form, Button } from 'react-bootstrap';
 import {
     Redirect
 } from "react-router-dom";
+import '../../css/loginsignup.css'
+import brownianLogo from '../../css/brownian_logo.png'
 
 export default class LoginSignUpComponent extends React.Component {
     constructor(props) {
@@ -85,29 +87,46 @@ export default class LoginSignUpComponent extends React.Component {
             return <Redirect to='/manage' />
         }
         return (
-            <Form>
-                <Form.Group controlId="formBasicEmail">
-                    <Form.Label>Email address</Form.Label>
-                    <Form.Control type="email" placeholder="Email" value={this.state.username} onChange={this.handleChangeUsername} />
-                    <Form.Text className="text-muted">
-                        We'll never share your email with anyone else.
-                    </Form.Text>
-                </Form.Group>
+            <div className="flexContainer">
+                <div className="banner">
+                    <img src={brownianLogo} alt="Logo for Brownian"></img> 
+                </div>
+                <div className="flexCol">
+                    <div className='login'> 
+                        <h1 className='login__header'>
+                            Welcome to Brownian
+                        </h1>
+                        <Form>
+                            <Form.Group controlId="formBasicEmail">
+                                <Form.Label>Email address</Form.Label>
+                                <Form.Control type="email" placeholder="Email" value={this.state.username} onChange={this.handleChangeUsername} />
+                                <Form.Text className="text-muted">
+                                    We'll never share your email with anyone else.
+                                </Form.Text>
+                            </Form.Group>
 
-                <Form.Group controlId="formBasicPassword">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control type="password" placeholder="Password" value={this.state.password} onChange={this.handleChangePassword} />
-                </Form.Group>
-                <Form.Group controlId="formBasicCheckbox">
-                    <Form.Check type="checkbox" label="Check me out" />
-                </Form.Group>
-                <Button variant="primary" onClick={this.handleLogin}>
-                    Login
-                </Button>
-                <Button variant="primary" onClick={this.handleSignup}>
-                    Signup
-                </Button>
-            </Form>
+                            <Form.Group controlId="formBasicPassword">
+                                <Form.Label>Password</Form.Label>
+                                <Form.Control type="password" placeholder="Password" value={this.state.password} onChange={this.handleChangePassword} />
+                            </Form.Group>
+                            {/* <Form.Group controlId="formBasicCheckbox">
+                                <Form.Check type="checkbox" label="Check me out" />
+                            </Form.Group> */}
+                            <div className = 'login__buttonDiv'>
+                                <Button className = 'login__button' variant="primary" onClick={this.handleLogin}>
+                                    Login
+                                </Button>
+                                <Button className = 'login__button' variant="primary" onClick={this.handleSignup}>
+                                    Signup
+                                </Button>
+                            </div>
+                        </Form>    
+                    </div>
+                    
+                </div>
+                
+            </div>
+            
         );
     }
 }

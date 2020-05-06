@@ -1,0 +1,46 @@
+.flexContainer{
+    display:flex;
+    flex-direction: row;
+    height: 100%;
+    width: auto;
+}
+
+.flexCol{
+    display: flex;
+    flex:1;
+    align-items: center;
+}
+
+.banner{
+    display: flex;
+    flex:1;
+    background-color: #827070;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+.login{
+    margin-left: 100px;
+}
+
+.login__header{
+    margin-bottom: 20px;
+}
+
+.login__buttonDiv{
+    display: flex;
+    justify-content: space-between;
+}
+
+.login__button,
+.login__button:active,
+.login__button:active:hover,
+.login__button:hover {
+    border-color: #827070;
+    background-color: #827070;
+    color: white;
+    width: 175px;
+    height: auto;
+}
