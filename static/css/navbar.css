@@ -1,3 +1,12 @@
 .logo__text{
     color: #827070;
 }
+
+.logoutButton,
+.logoutButton:active,
+.logoutButton:active:hover,
+.logoutButton:hover{
+    border-color: green;
+    background-color: white;
+    color: green;
+}

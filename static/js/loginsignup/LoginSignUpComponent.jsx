@@ -81,7 +81,7 @@ export default class LoginSignUpComponent extends React.Component {
             return <Redirect to='/manage' />
         }
         return (
-            <div className="flexContainer">
+            <div className="loginWrapper">
                 <div className="banner">
                     <img src={brownianLogo} alt="Logo for Brownian"></img> 
                 </div>
