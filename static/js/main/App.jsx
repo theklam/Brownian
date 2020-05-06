@@ -12,6 +12,7 @@ import {
   Route,
 } from "react-router-dom";
 import PrivateRoute from "../routing/PrivateRouteComponent";
+import '../../css/visualize.css'
 
 export default class App extends React.Component {
 
@@ -166,8 +167,26 @@ export default class App extends React.Component {
               <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} fetchPrices={this.fetchPrices} portfolioValue={this.state.portfolioValue} />
           </PrivateRoute>
           <PrivateRoute exact path="/visualize">
-            <Visualize fetchCurrentVisualize={this.fetchCurrentPortfolio} visualize={this.state.portfolioViz} title="Portfolio" />
-            <Visualize fetchCurrentVisualize={this.fetchCurrentBenchmark} visualize={this.state.benchmarkViz} title="Benchmark" />
+            {/* <div className='flexContainer'>
+              <div className="flexCol">
+              
+              </div>
+              <div className="flexCol">
+                
+              </div>
+            </div> */}
+            
+            <div className='visualize'>
+              <div className='visualize__graphContainer'>
+                <Visualize fetchCurrentVisualize={this.fetchCurrentPortfolio} visualize={this.state.portfolioViz} title="Portfolio" />
+              </div>
+              <div className='visualize__market'>
+                <Visualize fetchCurrentVisualize={this.fetchCurrentBenchmark} visualize={this.state.benchmarkViz} title="Benchmark" />
+              </div>
+            
+            
+            </div>
+            
           </PrivateRoute>
         </Switch>
       </Router>
