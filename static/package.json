@@ -25,6 +25,8 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
+    "brotli-webpack-plugin": "^1.1.0",
+    "compression-webpack-plugin": "^1.1.12",
     "css-loader": "^3.5.3",
     "file-loader": "^6.0.0",
     "react": "^16.2.0",

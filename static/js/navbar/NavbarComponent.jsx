@@ -30,9 +30,9 @@ export default class NavbarComponent extends React.Component {
                         <LinkContainer to="/manage"><Nav.Link href="/manage">Manage</Nav.Link></LinkContainer>
                         <LinkContainer to="/visualize"><Nav.Link href="/visualize">Visualize</Nav.Link></LinkContainer>
                     </Nav>
-                    <Form inline>
-                        <Button variant="outline-success" onClick={this.handleLogout}>Logout</Button>
-                    </Form>
+                    
+                    <Button className='logoutButton' variant="outline-success" onClick={this.handleLogout}>Logout</Button>
+                    
                 </Navbar.Collapse>
             </Navbar>
         );
