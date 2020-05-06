@@ -8,7 +8,6 @@ import {
 // screen if you're not yet authenticated.
 export default function PrivateRoute({ children, ...rest }) {
     let currentUser = window.localStorage.getItem('userID');
-    console.log(currentUser);
     return (
         <Route
             {...rest}
