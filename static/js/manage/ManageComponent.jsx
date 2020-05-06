@@ -25,7 +25,7 @@ export default class ManageComponent extends React.Component {
                 </div>
                 <div>
                     <h2>Optimization Tool</h2>
-                    <PortfolioOptimization fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/>
+                    <PortfolioOptimization fetchCurrentHoldings= {this.props.fetchCurrentHoldings} items={this.props.items} portfolioValue={this.props.portfolioValue} fetchPrices={this.props.fetchPrices}/>
                 </div>
                 
             </div>

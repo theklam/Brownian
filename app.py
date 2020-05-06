@@ -42,7 +42,6 @@ def get_portfolio_value(datetime, user_id, freq):
         (SELECT ticker, price, MAX(time) as time from {} where time <= :time group by ticker) latest_prices
         WHERE recent_hold.ticker = latest_prices.ticker;
         '''.format(table),db.engine, params = {'user_id':user_id, 'time': datetime})
-    # print(portfolio)
     return portfolio
 
 def efficient_user_value(opening_time, user_id, freq):    
@@ -58,13 +57,11 @@ def efficient_user_value(opening_time, user_id, freq):
     and time <= :initial_time 
     group by ticker;
     ''', db.engine, params = {'user_id':user_id, 'initial_time': opening_time})
-    #print(init_hold)
     changes_in_hold  = pd.read_sql_query('''SELECT ticker, quantity, time 
     from holdings 
     where user_id = :user_id 
     and time > :initial_time;
     ''', db.engine, params = {'user_id':user_id, 'initial_time': opening_time})
-    #print(changes_in_hold)
 
     init_price = pd.read_sql_query('''select ticker, price, max(time) as time from {} where time <= :initial_time group by ticker;
     '''.format(table), db.engine, params = {'initial_time': opening_time}) 
@@ -132,8 +129,6 @@ def visualize():
         portfolio_dates = []
         portfolio_values = []
         date_list = []
-        # print('USER ID IS ~~~~~~~~~~~~~~~~~~~~~~')
-        # print(request.json['userID'])
         if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
             if freq == 'intraday':
@@ -164,7 +159,6 @@ def visualizeTest():
         freq = 'intraday'
         if user_id is not None:
             portfolio_history = efficient_user_value(trading_dates.market_open[-1].to_pydatetime(), user_id, freq)
-            # print(datetime.datetime.now() - timer)
             return portfolio_history.to_json(orient='index')
         else:
             # print('user_id is none here!')
@@ -228,18 +222,10 @@ def login():
             return ''
         return 'logged in'
 
-# # TODO route to homepage if signup successful and display error message if not
-# @app.route("/logout", methods=["GET"])
-# def logout():
-#     if request.method == "GET":
-#         print('user_id is now none')
-#         return 'log out done'
-
 @app.route("/signup", methods=["GET","POST"])
 def signup():
     if request.method == "POST":
         pw_hash = bcrypt.generate_password_hash(request.json['password'].encode('utf-8')).decode('utf-8')
-        print(pw_hash)
         new_user = pd.DataFrame({'user_name': [request.json['username']], 'password': [pw_hash]})
         new_user.to_sql(name='user_account', con = db.engine, index=False, if_exists= 'append')
         return 'signup done'
@@ -289,7 +275,6 @@ def holdings():
                 ''',db.engine, params={'user_id': user_id})
             
                 portfolio = user_portfolio[user_portfolio['quantity'] > 0]
-                print('user_id is provided here!')
                 return portfolio.to_json(orient='index')
         else:
             print('user_id is none here!')
@@ -312,9 +297,7 @@ def prices():
                     api_prices.to_sql(name='intraday_prices', con = db.engine, index=False, if_exists= 'append')
 
             elif freq == 'monthly' or freq == 'yearly':
-                print("prices reached")
                 api_prices = iex_calls.get_price_data(stocks_to_update, True, freq)
-                # print(api_prices)
                 api_prices.to_sql(name='daily_prices', con = db.engine, index=False, if_exists= 'append')
             cleanDB()
             return api_prices.to_json(orient='index')
@@ -331,9 +314,10 @@ def portfolioRisk():
     if request.method == "POST":
         if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
+            stock_list = request.json['stocks']
             cleanDB()
             portfolio_prices = pd.read_sql_query('''select ticker, price, time from {} where time >= ? and time <= :end and ticker in ({});
-            '''.format('daily_prices',','.join('?' * len(request.json['stocks']))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + request.json['stocks']) 
+            '''.format('daily_prices',','.join('?' * len(stock_list))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + stock_list) 
             portfolio_prices = portfolio_prices.pivot(index = 'time', columns = 'ticker', values = 'price')
             
             if portfolio_prices.empty:
@@ -361,26 +345,41 @@ def optimzizePortfolio():
     if request.method == "POST":
         if request.json['userID'] != '' and request.json['userID'] is not None:
             user_id = int(request.json['userID'])
+            stock_list = request.json['stocks']
             portfolio_prices = pd.read_sql_query('''select ticker, price, time from {} where time >= ? and time <= :end and ticker in ({});
-            '''.format('daily_prices',','.join('?' * len(request.json['stocks']))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + request.json['stocks']) 
+            '''.format('daily_prices',','.join('?' * len(stock_list))), db.engine, params = [datetime.date.today() - datetime.timedelta(days=365), datetime.date.today()] + stock_list) 
             portfolio_prices = portfolio_prices.pivot(index = 'time', columns = 'ticker', values = 'price')
-
+            if portfolio_prices.empty:
+                return jsonify({"optimized_weights": [], "optimized_returns": '',"optimized_vol": '', "optimized_sharpe": '', "new_holdings": portfolio_prices.to_json(orient='index')})
             values = np.array(request.json['values'])
+            portfolio_value = np.sum(values)
             weights = values/np.sum(values)
+            current_prices = np.array(request.json['current_prices'])
+
+
             mean_returns_annual, cov_annual = risk_formulas.log_hist_returns(portfolio_prices)
             if request.json['opt_style'] == "max_sharpe":
-                optimized_weights = risk_formulas.max_sharpe_ratio(mean_returns_annual, cov_annual,  0.01, min(1/len(request.json['stocks']),request.json['min_weight']), max(1/len(request.json['stocks']),request.json['max_weight']))
+                optimized_weights = risk_formulas.max_sharpe_ratio(mean_returns_annual, cov_annual,  0.01, min(1/len(stock_list),request.json['min_weight']), max(1/len(stock_list),request.json['max_weight']))
                 optimized_returns, optimized_vol = risk_formulas.portfolio_annualised_performance(optimized_weights, mean_returns_annual, cov_annual)
                 optimized_sharpe = -1*risk_formulas.neg_sharpe_ratio(optimized_weights, mean_returns_annual, cov_annual, 0.01)
                 
             elif request.json['opt_style'] == "min_vol":
-                optimized_weights = risk_formulas.min_variance(mean_returns_annual, cov_annual, min(1/len(request.json['stocks']),request.json['min_weight']), max(1/len(request.json['stocks']),request.json['max_weight']))
+                optimized_weights = risk_formulas.min_variance(mean_returns_annual, cov_annual, min(1/len(stock_list),request.json['min_weight']), max(1/len(stock_list),request.json['max_weight']))
                 optimized_returns, optimized_vol = risk_formulas.portfolio_annualised_performance(optimized_weights, mean_returns_annual, cov_annual)
                 optimized_sharpe = -1*risk_formulas.neg_sharpe_ratio(optimized_weights, mean_returns_annual, cov_annual, 0.01)
             else:
                 return {}
-
-            return jsonify({"optimized_weights": optimized_weights.tolist(), "optimized_returns": optimized_returns,"optimized_vol": optimized_vol, "optimized_sharpe": optimized_sharpe})
+            
+            
+            optimized_values = optimized_weights*portfolio_value
+            optimized_shares = optimized_values/current_prices
+            new_holding = pd.DataFrame({'user_id':[user_id]*len(stock_list),'ticker': stock_list, 'quantity': optimized_shares.tolist(), 'time': [datetime.datetime.now()]*len(stock_list)})
+            #new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
+            new_holding.drop(columns=['user_id','time'], inplace=True)
+            price_map = pd.DataFrame({'ticker':stock_list, 'price':current_prices})
+            new_holding = new_holding.merge(price_map)
+            new_holding['total_value'] = new_holding['quantity']*new_holding['price']
+            return jsonify({"optimized_weights": optimized_weights.tolist(), "optimized_returns": optimized_returns,"optimized_vol": optimized_vol, "optimized_sharpe": optimized_sharpe, "new_holdings":new_holding.to_json(orient='index')})
         else:
             print('user_id is none here!')
             return {}
@@ -402,7 +401,7 @@ def rebalancePortfolio():
             optimized_values = optimized_weights*portfolio_value
             optimized_shares = optimized_values/prices
 
-            new_holding = pd.DataFrame({'user_id':[user_id]*len(request.json['stocks']),'ticker': request.json['stocks'], 'quantity': optimized_shares.tolist(), 'time': [datetime.datetime.now()]*len(request.json['stocks'])})
+            new_holding = pd.DataFrame({'user_id':[user_id]*len(stock_list),'ticker': stock_list, 'quantity': optimized_shares.tolist(), 'time': [datetime.datetime.now()]*len(stock_list)})
             new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
             return new_holding.to_json(orient='index')
     
@@ -415,7 +414,7 @@ def clearHoldings():
             user_id = int(request.json['userID'])
             stock_list = request.json['stocks']
 
-            new_holding = pd.DataFrame({'user_id':[user_id]*len(request.json['stocks']),'ticker': request.json['stocks'], 'quantity': 0, 'time': [datetime.datetime.now()]*len(request.json['stocks'])})
+            new_holding = pd.DataFrame({'user_id':[user_id]*len(stock_list),'ticker': stock_list, 'quantity': 0, 'time': [datetime.datetime.now()]*len(stock_list)})
             new_holding.to_sql(name='holdings', con = db.engine, index=False, if_exists= 'append')
             return new_holding.to_json(orient='index')
     

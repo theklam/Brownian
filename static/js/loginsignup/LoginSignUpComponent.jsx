@@ -19,7 +19,6 @@ export default class LoginSignUpComponent extends React.Component {
         this.handleChangePassword = this.handleChangePassword.bind(this);
         this.handleLogin = this.handleLogin.bind(this);
         this.handleSignup = this.handleSignup.bind(this);
-        console.log(window.localStorage.getItem('userID'));
     }
 
     handleChangeUsername(event) {
@@ -32,7 +31,6 @@ export default class LoginSignUpComponent extends React.Component {
 
 
     handleLogin(e) {
-        console.log('The signup link was clicked.');
 
         const requestOptions = {
             method: 'POST',
@@ -43,15 +41,12 @@ export default class LoginSignUpComponent extends React.Component {
             .then(res => res.text())
             .then(
                 (result) => {
-                    console.log('here');
                     // failed!
                     if (result == '') {
                         console.log('wrong username or password');
                     }
                     else {
-                        console.log('logged in!');
                         window.localStorage.setItem('userID', result);
-                        console.log(window.localStorage.getItem('userID'))
                         this.setState({
                             toManage: true
                         });
@@ -70,7 +65,6 @@ export default class LoginSignUpComponent extends React.Component {
     }
 
     handleSignup(e) {
-        console.log('The signup link was clicked.');
 
         const requestOptions = {
             method: 'POST',
@@ -98,7 +92,7 @@ export default class LoginSignUpComponent extends React.Component {
                         </h1>
                         <Form>
                             <Form.Group controlId="formBasicEmail">
-                                <Form.Label>Email address</Form.Label>
+                                <Form.Label>Username or Email address</Form.Label>
                                 <Form.Control type="email" placeholder="Email" value={this.state.username} onChange={this.handleChangeUsername} />
                                 <Form.Text className="text-muted">
                                     We'll never share your email with anyone else.

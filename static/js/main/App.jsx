@@ -117,8 +117,6 @@ export default class App extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
-          console.log('benchmark is: ');
-          console.log(result);
           let tmp = Object.values(result);
           tmp = tmp.map(x => x.price);
           this.setState({

@@ -1,6 +1,7 @@
 import React from "react";
 import { Table, Dropdown, Form, Col, DropdownButton } from 'react-bootstrap';
 import OptimizeButton from "./OptimizeButtonComponent";
+import TickerTable from "./TickerTableComponent";
 import '../../css/manage.css'
 
 
@@ -12,6 +13,7 @@ export default class PortfolioOptimizationComponent extends React.Component {
             optimizedVol: '',
             optimizedSharpe: '',
             optimizedWeights: [],
+            optimizedItems: [],
             opt_style: 'max_sharpe',
             minWeight:0.0,
             maxWeight:0.5
@@ -25,34 +27,38 @@ export default class PortfolioOptimizationComponent extends React.Component {
     }
 
     componentDidMount() {
-        
+        this.optimizePortfolio()
+    }
+    componentDidUpdate(prevProps) {
+        if (this.props.items !== prevProps.items) {
+            this.optimizePortfolio();
+        }
     }
 
     optimizePortfolio() {
         let portfolio_stocks = this.props.items.map(a => a.ticker);
         let portfolio_values = this.props.items.map(a => a.total_value);
+        let portfolio_prices = this.props.items.map(a => a.price);
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ stocks: portfolio_stocks, freq: 'daily', values: portfolio_values, opt_style: this.state.opt_style, min_weight: this.state.minWeight, max_weight: this.state.maxWeight, userID: window.localStorage.getItem('userID')})
+            body: JSON.stringify({ stocks: portfolio_stocks, freq: 'daily', current_prices: portfolio_prices, values: portfolio_values, opt_style: this.state.opt_style, min_weight: this.state.minWeight, max_weight: this.state.maxWeight, userID: window.localStorage.getItem('userID')})
         };
         fetch('/optimizePortfolio', requestOptions)
             .then(response => response.json())
             .then(response => {
-                console.log(this.state.minWeight)
-                console.log(this.state.maxWeight)
-                console.log(response)
+                let optimized_json = JSON.parse(response['new_holdings']);
                 this.setState({
                     optimizedReturns: response["optimized_returns"],
                     optimizedVol: response["optimized_vol"],
                     optimizedSharpe: response["optimized_sharpe"],
-                    optimizedWeights: response["optimized_weights"]
+                    optimizedWeights: response["optimized_weights"],
+                    optimizedItems: Object.values(optimized_json)
                 });
             });
     }
 
     updateHoldings(){
-        console.log('update holdings')
         let portfolio_stocks = this.props.items.map(a => a.ticker);
         let portfolio_values = this.props.items.map(a => a.total_value);
         let portfolio_prices = this.props.items.map(a => a.price);
@@ -115,6 +121,7 @@ export default class PortfolioOptimizationComponent extends React.Component {
                     </tr>
                 </tbody>
                 </Table>
+                <TickerTable items={this.state.optimizedItems} portfolioValue={this.props.portfolioValue} fetchCurrentHoldings={this.props.fetchCurrentHoldings} fetchPrices={this.props.fetchPrices}/>
                 <Form>
                     <Form.Row>
                         <Col>
@@ -130,7 +137,6 @@ export default class PortfolioOptimizationComponent extends React.Component {
                         <OptimizeButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} updateHoldings={this.updateHoldings}/>
                     </Form.Row>
                 </Form>
-                
             </div>
         );
     }
