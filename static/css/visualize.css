@@ -1,33 +1,49 @@
 /* Style the lines by removing the fill and applying a stroke */
-  .line {
-    fill: none;
-    stroke: #ffab00;
-    stroke-width: 3;
-  }
 
-  .overlay {
-    fill: none;
-    pointer-events: all;
-  }
+.line {
+  fill: none;
+  stroke: #ffab00;
+  stroke-width: 3;
+}
 
-  /* Style the dots by assigning a fill and stroke */
-  .dot {
-    fill: #ffab00;
-    stroke: #fff;
-  }
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
 
-  .focus circle {
-    fill: none;
-    stroke: steelblue;
-  }
+/* Style the dots by assigning a fill and stroke */
 
-  .viz{
-    display: flex;
-    flex-direction: row;
-  }
-  
-  .flexCol{
-    display: flex;
-    flex:1;
-    align-items: center;
-  }
+.dot {
+  fill: #ffab00;
+  stroke: #fff;
+}
+
+.focus circle {
+  fill: none;
+  stroke: steelblue;
+}
+
+.viz {
+  display: flex;
+  flex-direction: row;
+}
+
+.tooltip {
+  position: absolute;
+  font-size: 12px;
+  min-width: 100px;
+  padding: 10px;
+  width: auto;
+  height: auto;
+  pointer-events: none;
+  background-color: white;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 5px;
+}
+
+.flexCol {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}

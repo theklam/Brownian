@@ -64,14 +64,13 @@ const draw = (props, title) => {
 
     // Mouseover function to display the tooltip on hover
     let mouseover = function (d) {
-        let color_span = `<span style="color: purple;">`;
-        let html = `${d.y}</span><br/>`;       // HINT: Display the song here
+        let html = `<span style="color: brown;">${d.y}</span><br/>`;       // HINT: Display the song here
 
         // Show the tooltip and set the position relative to the event X and Y location
         tooltip.html(html)
             .style("left", `${(d3.event.pageX) - 220}px`)
             .style("top", `${(d3.event.pageY) - 30}px`)
-            .style("box-shadow", `2px 2px 5px yellow`)    // OPTIONAL for students
+            .style("box-shadow", `2px 2px 5px brown`)    // OPTIONAL for students
             .transition()
             .duration(200)
             .style("opacity", 0.9)
