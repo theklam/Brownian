@@ -21,21 +21,11 @@
     stroke: steelblue;
   }
 
-  .visualize{
-    display:flex;
+  .viz{
+    display: flex;
     flex-direction: row;
-    height: 100%;
-    width: 100%;
-
   }
-  .visualize__graphContainer{
-    height: auto;
-    width: 50%;
-  }
-  .visualize__market{
-    height: auto;
-    width: 50%;
-  }
+  
   .flexCol{
     display: flex;
     flex:1;
