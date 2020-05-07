@@ -87,7 +87,7 @@ export default class VisualizeComponent extends React.Component {
 
         this.fetchCurrentBenchmark()
             .then(() => console.log('test post pull'))
-            .then(() => draw(this.state.benchmarkViz, 'Optimized'));
+            .then(() => draw(this.state.benchmarkViz, 'Benchmark (S+P 500)'));
     }
 
     render() {
