@@ -1,79 +1,55 @@
 import * as d3 from 'd3';
 
-const draw = (props, title) => {
-    // 2. Use the margin convention practice 
-    var margin = { top: 50, right: 50, bottom: 50, left: 50 }
-        , width = window.innerWidth - margin.left - margin.right // Use the window's width 
-        , height = window.innerHeight - margin.top - margin.bottom; // Use the window's height
+const draw = (items, div_title) => {
+    // set the dimensions and margins of the graph
+    var width = 450
+    var height = 450
+    var margin = 40
 
-    // The number of datapoints
-    var n = props.length;
+    // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+    var radius = Math.min(width, height) / 2 - margin
 
-    // 5. X scale will use the index of our data
-    var xScale = d3.scaleLinear()
-        .domain([0, n - 1]) // input
-        .range([0, width]); // output
+    // append the svg object to the div called 'my_dataviz'
+    console.log(div_title);
+    var divToSelect = "." + div_title;
+    console.log(divToSelect);
 
-    // 6. Y scale will use the randomly generate number 
-    var yScale = d3.scaleLinear()
-        .domain([0, d3.max(props)]) // input 
-        .range([height, 0]); // output 
+    // remove the old viz
+    d3.select(divToSelect + " > *").remove();
 
-    // 7. d3's line generator
-    var line = d3.line()
-        .x(function (d, i) { return xScale(i); }) // set the x values for the line generator
-        .y(function (d) { return yScale(d.y); }) // set the y values for the line generator 
-        // .curve(d3.curveMonotoneX) // apply smoothing to the line
-
-    // 8. An array of objects of length N. Each object has key -> value pair, the key being "y" and the value is a random number
-    var dataset = d3.range(n).map(function (d) { return { "y": props[d] } })
-
-    // 1. Add the SVG to the page and employ #2
-    var svg = d3.select(".viz").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+    var svg = d3.select(divToSelect)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-    // 3. Call the x axis in a group tag
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+    // Create dummy data
+    var data = { a: 2, b: 20, c: 30, d: 8, e: 12 }
 
-    // 4. Call the y axis in a group tag
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+    // set the color scale
+    var color = d3.scaleOrdinal()
+        .domain(data)
+        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
 
-    // 9. Append the path, bind the data, and call the line generator 
-    svg.append("path")
-        .datum(dataset) // 10. Binds data to the line 
-        .attr("class", "line") // Assign a class for styling 
-        .attr("d", line); // 11. Calls the line generator 
+    // Compute the position of each group on the pie:
+    var pie = d3.pie()
+        .value(function (d) { return d.value; })
+    var data_ready = pie(d3.entries(data))
 
-    // 12. Appends a circle for each datapoint 
-    svg.selectAll(".dot")
-        .data(dataset)
-        .enter().append("circle") // Uses the enter().append() method
-        .attr("class", "dot") // Assign a class for styling
-        .attr("cx", function (d, i) { return xScale(i) })
-        .attr("cy", function (d) { return yScale(d.y) })
-        .attr("r", 5)
-        .on("mouseover", function (a, b, c) {
-            console.log(a)
-            d3.select(this).attr('class', 'focus');
-        })
-        .on("mouseout", function () { 
-            d3.select(this).attr('class', 'dot');
-        })
-
-    svg.append("text")
-        .attr("x", (width / 2))
-        .attr("y", 0 - (margin.top / 2))
-        .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .style("text-decoration", "underline")
-        .text(title);
+    // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+    svg
+        .selectAll('whatever')
+        .data(data_ready)
+        .enter()
+        .append('path')
+        .attr('d', d3.arc()
+            .innerRadius(0)
+            .outerRadius(radius)
+        )
+        .attr('fill', function (d) { return (color(d.data.key)) })
+        .attr("stroke", "black")
+        .style("stroke-width", "2px")
+        .style("opacity", 0.7)
 }
 export default draw

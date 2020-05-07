@@ -1,6 +1,5 @@
 import React from "react";
 import draw from './visualizeStocks.js'
-import '../../css/visualizeStocks.css'; // Tell webpack that Button.js uses these styles
 
 
 /**
@@ -12,12 +11,20 @@ export default class VisualizeStocksComponent extends React.Component {
     }
 
     componentDidMount() {
-        draw(this.props.visualize, this.props.title);
+        console.log('component mounted');
+        console.log(this.props.items);
+        draw(this.props.items, this.props.div_title);
+    }
+
+    componentDidUpdate() {
+        console.log('component updated');
+        console.log(this.props.items);
+        draw(this.props.items, this.props.div_title);
     }
 
     render() {
         return (
-            <div className="viz"></div>
+            <div className={this.props.div_title}></div>
         );
     }
 }
