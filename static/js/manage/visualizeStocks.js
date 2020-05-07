@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 
-const draw = (items, div_title) => {
+const draw = (data, div_title) => {
     // set the dimensions and margins of the graph
     var width = 450
     var height = 450
@@ -24,18 +24,13 @@ const draw = (items, div_title) => {
         .append("g")
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-    // Create dummy data
-    var data = { a: 2, b: 20, c: 30, d: 8, e: 12 }
-
     // set the color scale
-    var color = d3.scaleOrdinal()
-        .domain(data)
-        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
+    var color = d3.scaleOrdinal(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
 
     // Compute the position of each group on the pie:
     var pie = d3.pie()
-        .value(function (d) { return d.value; })
-    var data_ready = pie(d3.entries(data))
+        .value(function (d) { return d.total_value; })
+    var data_ready = pie(data);
 
     // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
     svg
@@ -47,7 +42,7 @@ const draw = (items, div_title) => {
             .innerRadius(0)
             .outerRadius(radius)
         )
-        .attr('fill', function (d) { return (color(d.data.key)) })
+        .attr('fill', function (d, i) { return (color(i)) })
         .attr("stroke", "black")
         .style("stroke-width", "2px")
         .style("opacity", 0.7)
