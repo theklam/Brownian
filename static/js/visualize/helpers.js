@@ -23,7 +23,7 @@ const draw = (props, title) => {
     var line = d3.line()
         .x(function (d, i) { return xScale(i); }) // set the x values for the line generator
         .y(function (d) { return yScale(d.y); }) // set the y values for the line generator 
-        // .curve(d3.curveMonotoneX) // apply smoothing to the line
+    // .curve(d3.curveMonotoneX) // apply smoothing to the line
 
     // 8. An array of objects of length N. Each object has key -> value pair, the key being "y" and the value is a random number
     var dataset = d3.range(n).map(function (d) { return { "y": props[d] } })
@@ -34,6 +34,16 @@ const draw = (props, title) => {
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Set up reference to tooltip
+    let tooltip = d3.select(".viz")     // HINT: div id for div containing scatterplot
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+    /*
+        Create tooltip as a div right underneath the SVG scatter plot.
+        Initially tooltip is invisible (opacity 0). We add the tooltip class for styling.
+     */
 
     // 3. Call the x axis in a group tag
     svg.append("g")
@@ -52,6 +62,34 @@ const draw = (props, title) => {
         .attr("class", "line") // Assign a class for styling 
         .attr("d", line); // 11. Calls the line generator 
 
+    // Mouseover function to display the tooltip on hover
+    let mouseover = function (d) {
+        let color_span = `<span style="color: purple;">`;
+        let html = `${d.y}</span><br/>`;       // HINT: Display the song here
+
+        // Show the tooltip and set the position relative to the event X and Y location
+        tooltip.html(html)
+            .style("left", `${(d3.event.pageX) - 220}px`)
+            .style("top", `${(d3.event.pageY) - 30}px`)
+            .style("box-shadow", `2px 2px 5px yellow`)    // OPTIONAL for students
+            .transition()
+            .duration(200)
+            .style("opacity", 0.9)
+
+        console.log(d)
+        d3.select(this).attr('class', 'focus');
+    };
+
+    // Mouseout function to hide the tool on exit
+    let mouseout = function (d) {
+        // Set opacity back to 0 to hide
+        tooltip.transition()
+            .duration(200)
+            .style("opacity", 0);
+
+        d3.select(this).attr('class', 'dot');
+    };
+
     // 12. Appends a circle for each datapoint 
     svg.selectAll(".dot")
         .data(dataset)
@@ -60,13 +98,8 @@ const draw = (props, title) => {
         .attr("cx", function (d, i) { return xScale(i) })
         .attr("cy", function (d) { return yScale(d.y) })
         .attr("r", 5)
-        .on("mouseover", function (a, b, c) {
-            console.log(a)
-            d3.select(this).attr('class', 'focus');
-        })
-        .on("mouseout", function () { 
-            d3.select(this).attr('class', 'dot');
-        })
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout)
 
     svg.append("text")
         .attr("x", (width / 2))
