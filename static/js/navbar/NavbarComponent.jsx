@@ -1,6 +1,9 @@
 import React from "react";
 import { Navbar, Nav, NavDropdown, Form, FormControl, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
+import {
+    NavLink
+} from "react-router-dom";
 import '../../css/navbar.css';
 
 export default class NavbarComponent extends React.Component {
@@ -22,17 +25,16 @@ export default class NavbarComponent extends React.Component {
         return (
             <Navbar bg="light" expand="lg">
                 <Navbar.Brand className="logo__text" href="/">Brownian</Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
-                        <LinkContainer to="/"><Nav.Link href="/">Home</Nav.Link></LinkContainer>
-                        <LinkContainer to="/loginsignup"><Nav.Link href="/loginsignup">Login/Signup</Nav.Link></LinkContainer>
-                        <LinkContainer to="/manage"><Nav.Link href="/manage">Manage</Nav.Link></LinkContainer>
-                        <LinkContainer to="/visualize"><Nav.Link href="/visualize">Visualize</Nav.Link></LinkContainer>
+                        <LinkContainer exact to="/"><Nav.Link>Home</Nav.Link></LinkContainer>
+                        <LinkContainer exact to="/loginsignup"><Nav.Link>Login/Signup</Nav.Link></LinkContainer>
+                        <LinkContainer exact to="/manage"><Nav.Link>Manage</Nav.Link></LinkContainer>
+                        <LinkContainer exact to="/visualize"><Nav.Link>Visualize</Nav.Link></LinkContainer>
                     </Nav>
-                    
+
                     <Button className='logoutButton' variant="outline-success" onClick={this.handleLogout}>Logout</Button>
-                    
+
                 </Navbar.Collapse>
             </Navbar>
         );
