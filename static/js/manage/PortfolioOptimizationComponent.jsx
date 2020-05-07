@@ -2,6 +2,7 @@ import React from "react";
 import { Table, Dropdown, Form, Col, DropdownButton } from 'react-bootstrap';
 import OptimizeButton from "./OptimizeButtonComponent";
 import TickerTable from "./TickerTableComponent";
+import VisualizeStocks from "./VisualizeStocksComponent";
 import '../../css/manage.css'
 
 
@@ -121,6 +122,7 @@ export default class PortfolioOptimizationComponent extends React.Component {
                     </tr>
                 </tbody>
                 </Table>
+                <VisualizeStocks items={this.state.optimizedItems} div_title="optimized"/>
                 <TickerTable items={this.state.optimizedItems} portfolioValue={this.props.portfolioValue} fetchCurrentHoldings={this.props.fetchCurrentHoldings} fetchPrices={this.props.fetchPrices}/>
                 <Form>
                     <Form.Row>

@@ -21,15 +21,11 @@ export default class App extends React.Component {
     this.state = {
       isLoaded: false,
       items: [],
-      portfolioViz: [],
-      benchmarkViz: [],
       portfolioValue: 0
 
     };
     // window.localStorage.setItem('userID', '');
     this.fetchCurrentHoldings = this.fetchCurrentHoldings.bind(this);
-    this.fetchCurrentPortfolio = this.fetchCurrentPortfolio.bind(this);
-    this.fetchCurrentBenchmark = this.fetchCurrentBenchmark.bind(this);
     this.fetchPrices = this.fetchPrices.bind(this);
     this.getPortfolioValue = this.getPortfolioValue.bind(this);
   }
@@ -78,64 +74,6 @@ export default class App extends React.Component {
       )
   }
 
-  fetchCurrentPortfolio() {
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ freq: 'monthly', userID: window.localStorage.getItem('userID') })
-    };
-    return fetch("/visualize", requestOptions)
-      .then(res => res.json())
-      .then(
-        (result) => {
-          let tmp = Object.values(result);
-          tmp = tmp.map(x => x.values);
-          this.setState({
-            isLoaded: true,
-            portfolioViz: tmp
-          });
-        },
-        // Note: it's important to handle errors here
-        // instead of a catch() block so that we don't swallow
-        // exceptions from actual bugs in components.
-        (error) => {
-          this.setState({
-            isLoaded: true,
-            error
-          });
-        }
-      )
-  }
-
-  fetchCurrentBenchmark() {
-    const requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ freq: 'monthly', userID: window.localStorage.getItem('userID') })
-    };
-    return fetch("/visualizeBenchmark", requestOptions)
-      .then(res => res.json())
-      .then(
-        (result) => {
-          let tmp = Object.values(result);
-          tmp = tmp.map(x => x.price);
-          this.setState({
-            isLoaded: true,
-            benchmarkViz: tmp
-          });
-        },
-        // Note: it's important to handle errors here
-        // instead of a catch() block so that we don't swallow
-        // exceptions from actual bugs in components.
-        (error) => {
-          this.setState({
-            isLoaded: true,
-            error
-          });
-        }
-      )
-  }
-
   // fetchPrices takes in an array, i.e., [AAPL, TWTR, ...], and updates the prices of said array
   // if no array is provided, then the one that we use is the items array
   fetchPrices(portfolio_stocks) {
@@ -162,29 +100,10 @@ export default class App extends React.Component {
             <LoginSignUp />
           </Route>
           <PrivateRoute exact path="/manage">
-              <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} fetchPrices={this.fetchPrices} portfolioValue={this.state.portfolioValue} />
+            <Manage fetchCurrentHoldings={this.fetchCurrentHoldings} items={this.state.items} fetchPrices={this.fetchPrices} portfolioValue={this.state.portfolioValue} />
           </PrivateRoute>
           <PrivateRoute exact path="/visualize">
-            {/* <div className='flexContainer'>
-              <div className="flexCol">
-              
-              </div>
-              <div className="flexCol">
-                
-              </div>
-            </div> */}
-            
-            <div className='visualize'>
-              <div className='visualize__graphContainer'>
-                <Visualize fetchCurrentVisualize={this.fetchCurrentPortfolio} visualize={this.state.portfolioViz} title="Portfolio" />
-              </div>
-              <div className='visualize__market'>
-                <Visualize fetchCurrentVisualize={this.fetchCurrentBenchmark} visualize={this.state.benchmarkViz} title="Benchmark" />
-              </div>
-            
-            
-            </div>
-            
+            <Visualize />
           </PrivateRoute>
         </Switch>
       </Router>

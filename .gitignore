@@ -1,5 +1,5 @@
 .idea/
 static/node_modules/
 venv/
-static/dist/bundle.js
+static/dist/
 __pycache__/
