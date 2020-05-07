@@ -23,18 +23,23 @@ const draw = (data, div_title) => {
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
     // Create dummy data
-    var data = { a: 9, b: 20, c: 30, d: 8, e: 12, f: 3, g: 7, h: 14 }
+    // var data = { a: 9, b: 20, c: 30, d: 8, e: 12, f: 3, g: 7, h: 14 }
+
+    // groups should be: ['AAPL', 'TSLA', ...]
+    let tickers = data.map(function(d) { return d.ticker });
+    console.log(tickers);
 
     // set the color scale
     var color = d3.scaleOrdinal()
-        .domain(["a", "b", "c", "d", "e", "f", "g", "h"])
+        .domain(tickers)
         .range(d3.schemeDark2);
 
     // Compute the position of each group on the pie:
     var pie = d3.pie()
         .sort(null) // Do not sort group by size
-        .value(function (d) { return d.value; })
-    var data_ready = pie(d3.entries(data))
+        .value(function (d) { return d.total_value; })
+    var data_ready = pie(data)
+    console.log(data_ready);
 
     // The arc generator
     var arc = d3.arc()
@@ -53,7 +58,7 @@ const draw = (data, div_title) => {
         .enter()
         .append('path')
         .attr('d', arc)
-        .attr('fill', function (d) { return (color(d.data.key)) })
+        .attr('fill', function (d) { return (color(d.data.ticker)) })
         .attr("stroke", "white")
         .style("stroke-width", "2px")
         .style("opacity", 0.7)
@@ -82,7 +87,7 @@ const draw = (data, div_title) => {
         .data(data_ready)
         .enter()
         .append('text')
-        .text(function (d) { console.log(d.data.key); return d.data.key })
+        .text(function (d) { console.log(d.data.ticker); return d.data.ticker })
         .attr('transform', function (d) {
             var pos = outerArc.centroid(d);
             var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
