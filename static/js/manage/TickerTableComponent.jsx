@@ -21,6 +21,7 @@ export default class TickerTableComponent extends React.Component {
                         <th>Price</th>
                         <th>Quantity</th>
                         <th>Value</th>
+                        <th>Weight</th>
                     </tr>
                 </thead>
                 <tbody>

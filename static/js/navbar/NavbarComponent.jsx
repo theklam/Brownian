@@ -24,6 +24,7 @@ export default class NavbarComponent extends React.Component {
     render() {
         return (
             <Navbar bg="light" expand="lg">
+                <a href="#main" id="skip">Skip to Content</a>
                 <Navbar.Brand className="logo__text" href="/">Brownian</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
