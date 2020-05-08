@@ -33,10 +33,6 @@ Stock portfolio analytics and visualization tool
 5) install front end dependencies:  
 ```
 $ npm install  
-(dev-only):  
-$ npm i webpack --save-dev  
-$ npm i babel-core babel-loader babel-preset-es2015 babel-preset-react --save-dev  
-$ npm i react react-dom --save-dev
 ```
 
 5) build the front end (we use 'npm run watch' to avoid building the front end everytime a change is made):  
