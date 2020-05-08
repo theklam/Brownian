@@ -1,7 +1,7 @@
 import React from "react";
 import draw from './helpers.js'
 import '../../css/visualize.css'; // Tell webpack that Button.js uses these styles
-
+import { Table } from 'react-bootstrap';
 
 /**
  * VisualizeComponent takes in fetchCurrentVisualize function in order to re-fetch whatever
@@ -13,7 +13,13 @@ export default class VisualizeComponent extends React.Component {
         super(props);
         this.state = {
             portfolioViz: [],
-            benchmarkViz: []
+            portReturn:'',
+            portHigh:'',
+            portLow:'',
+            benchmarkViz: [],
+            benchReturn:'',
+            benchHigh:'',
+            benchLow:''
         };
         this.fetchCurrentPortfolio = this.fetchCurrentPortfolio.bind(this);
         this.fetchCurrentBenchmark = this.fetchCurrentBenchmark.bind(this);
@@ -32,9 +38,20 @@ export default class VisualizeComponent extends React.Component {
                     console.log(result);
                     let tmp = Object.values(result);
                     tmp = tmp.map(x => x.values);
+                    let returns= '';
+                    let high = '';
+                    let low= '';
+                    if (tmp.length>0){
+                        returns = (tmp[tmp.length -1] -tmp[0])/tmp[0];
+                        high = Math.max(...tmp);
+                        low = Math.min(...tmp);
+                    }
                     this.setState({
                         isLoaded: true,
-                        portfolioViz: tmp
+                        portfolioViz: tmp,
+                        portReturn: returns,
+                        portHigh:high,
+                        portLow:low
                     });
                 },
                 // Note: it's important to handle errors here
@@ -63,9 +80,20 @@ export default class VisualizeComponent extends React.Component {
                     console.log(result);
                     let tmp = Object.values(result);
                     tmp = tmp.map(x => x.price);
+                    let returns= '';
+                    let high = '';
+                    let low= '';
+                    if (tmp.length>0){
+                        returns = (tmp[tmp.length -1] -tmp[0])/tmp[0];
+                        high = Math.max(...tmp);
+                        low = Math.min(...tmp);
+                    }
                     this.setState({
                         isLoaded: true,
-                        benchmarkViz: tmp
+                        benchmarkViz: tmp,
+                        benchReturn: returns,
+                        benchHigh:high,
+                        benchLow:low
                     });
                 },
                 // Note: it's important to handle errors here
@@ -98,7 +126,40 @@ export default class VisualizeComponent extends React.Component {
 
     render() {
         return (
-            <div className="viz"></div>
+            <div>
+                <h1 className = "visualize__heading">Historical Graphs</h1>
+                <div className="viz"></div>
+
+                <h1 className = "visualize__heading"> Historical Statistics</h1>
+                <Table striped bordered hover>
+                    <thead>
+                        <tr className="visualize__table__header"> 
+                            <th>Statistic</th>
+                            <th>Your Portfolio</th>
+                            <th>Benchmark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr> 
+                            <td>Returns</td>
+                            <td>{parseFloat(this.state.portReturn*100).toFixed(2)+"%"}</td>
+                            <td>{parseFloat(this.state.benchReturn*100).toFixed(2)+"%"}</td>
+                        </tr>
+                        <tr> 
+                            <td>High</td>
+                            <td>{parseFloat(this.state.portHigh).toFixed(2)}</td>
+                            <td>{parseFloat(this.state.benchHigh).toFixed(2)}</td>
+                        </tr>
+                        <tr> 
+                            <td>Low</td>
+                            <td>{parseFloat(this.state.portLow).toFixed(2)}</td>
+                            <td>{parseFloat(this.state.benchLow).toFixed(2)}</td>
+                        </tr>
+                    </tbody>
+                </Table>
+
+            </div>
+            
         );
     }
 }

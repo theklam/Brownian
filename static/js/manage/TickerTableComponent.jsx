@@ -2,7 +2,7 @@ import React from "react";
 import { Table } from 'react-bootstrap';
 import TickerRow from "./TickerRowComponent";
 import TickerTableTotalPriceRow from "./TickerTableTotalPriceRowComponent";
-import UpdatePricesButton from "./UpdatePricesButtonComponent";
+//import UpdatePricesButton from "./UpdatePricesButtonComponent";
 import '../../css/manage.css'
 export default class TickerTableComponent extends React.Component {
 
