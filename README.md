@@ -44,3 +44,7 @@ Stock portfolio analytics and visualization tool
 ```$ python app.py```
 
 7) access via browser ```http://0.0.0.0/``` and you are good to go :)
+
+## Note about Visualize Page
+
+The visualize page graphs use your portfolio value 1 month ago as its first data point, so if you create a new account you will not see your portfolio's monthly performance (as it did not exist until you created the account). If you want to see an example of the feature you can log in with username: bryan password: xian
