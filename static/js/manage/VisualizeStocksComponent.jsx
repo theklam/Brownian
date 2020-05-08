@@ -1,5 +1,5 @@
 import React from "react";
-import draw from './visualizeStocks.js'
+import { draw, update } from './visualizeStocks.js'
 
 
 /**
@@ -19,7 +19,8 @@ export default class VisualizeStocksComponent extends React.Component {
     componentDidUpdate() {
         console.log('component updated');
         console.log(this.props.items);
-        draw(this.props.items, this.props.div_title);
+        update(this.props.items);
+        // draw(this.props.items, this.props.div_title);
     }
 
     render() {
