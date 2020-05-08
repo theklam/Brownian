@@ -32,9 +32,7 @@ Stock portfolio analytics and visualization tool
 ```$ cd static```
 
 5) install front end dependencies:  
-```
-$ npm install  
-```
+```$ npm install```
 
 5) build the front end (we use 'npm run watch' to avoid building the front end everytime a change is made):  
 ```$ npm run watch```  
