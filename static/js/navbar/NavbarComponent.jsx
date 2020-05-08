@@ -25,6 +25,7 @@ export default class NavbarComponent extends React.Component {
         return (
             <Navbar bg="light" expand="lg">
                 <Navbar.Brand className="logo__text" href="/">Brownian</Navbar.Brand>
+                <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
                         <LinkContainer exact to="/"><Nav.Link>Home</Nav.Link></LinkContainer>
