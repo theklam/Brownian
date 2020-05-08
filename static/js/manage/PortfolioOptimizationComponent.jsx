@@ -49,6 +49,8 @@ export default class PortfolioOptimizationComponent extends React.Component {
             .then(response => response.json())
             .then(response => {
                 let optimized_json = JSON.parse(response['new_holdings']);
+                console.log('optimized weights')
+                console.log(optimized_json)
                 this.setState({
                     optimizedReturns: response["optimized_returns"],
                     optimizedVol: response["optimized_vol"],
@@ -82,7 +84,7 @@ export default class PortfolioOptimizationComponent extends React.Component {
     }
 
     handleChangeMinWeight(event) {
-        let weight = parseInt(event.target.value);
+        let weight = parseFloat(event.target.value);
         if (weight == null ||isNaN(weight)){
             weight = 0.0
         }
@@ -90,7 +92,7 @@ export default class PortfolioOptimizationComponent extends React.Component {
     }
 
     handleChangeMaxWeight(event) {
-        let weight = parseInt(event.target.value);
+        let weight = parseFloat(event.target.value);
         if (weight == null ||isNaN(weight)){
             weight = 0.5
         }
@@ -100,6 +102,8 @@ export default class PortfolioOptimizationComponent extends React.Component {
     render() {
         return (
             <div>
+                
+                <VisualizeStocks items={this.state.optimizedItems} div_title="optimized"/>
                 <Table striped bordered hover>
                 <thead>
                     <tr className="statTable__header">
@@ -118,27 +122,29 @@ export default class PortfolioOptimizationComponent extends React.Component {
                     </tr>
                     <tr>
                         <td>Optimized Sharpe Ratio</td>
-                        <td>{this.state.optimizedSharpe}</td>
+                        <td>{parseFloat(this.state.optimizedSharpe).toFixed(3)}</td>
                     </tr>
                 </tbody>
                 </Table>
-                <VisualizeStocks items={this.state.optimizedItems} div_title="optimized"/>
-                <TickerTable items={this.state.optimizedItems} portfolioValue={this.props.portfolioValue} fetchCurrentHoldings={this.props.fetchCurrentHoldings} fetchPrices={this.props.fetchPrices}/>
-                <Form>
-                    <Form.Row>
-                        <Col>
-                            <Form.Control placeholder="Minimum Weight" onChange={this.handleChangeMinWeight} />
-                        </Col>
-                        <Col>
-                            <Form.Control placeholder="Maximum Weight" onChange={this.handleChangeMaxWeight} />
-                        </Col>
-                        <DropdownButton className="manageButton" id="dropdown-basic-button" title="Optimize Portfolio">
+                <Form >
+                    <Form.Row className = 'updateForm'>
+                        <Form.Group controlId="minWeightField" className='updateForm__group'>
+                            <Form.Label className='updateForm__label text-muted'>Min Weight</Form.Label>
+                            <Form.Control type='text' defaultValue='0.0' onChange={this.handleChangeMinWeight} />
+                        </Form.Group>
+                        <Form.Group controlId="maxWeightField" className='updateForm__group'>
+                            <Form.Label className='updateForm__label text-muted'>Max Weight</Form.Label>
+                            <Form.Control type='text' defaultValue='0.5' onChange={this.handleChangeMaxWeight} />
+                        </Form.Group>
+                        <DropdownButton className="manageButtonDiv" id="dropdown-basic-button" title="Optimize Portfolio">
                             <Dropdown.Item eventKey="max_sharpe" onSelect={this.handleSelect}>Maximize Sharpe Ratio</Dropdown.Item>
                             <Dropdown.Item eventKey="min_vol" onSelect={this.handleSelect}>Minimize Volatility</Dropdown.Item>
                         </DropdownButton>
                         <OptimizeButton fetchCurrentHoldings={this.props.fetchCurrentHoldings} updateHoldings={this.updateHoldings}/>
                     </Form.Row>
                 </Form>
+                <TickerTable items={this.state.optimizedItems} portfolioValue={this.props.portfolioValue} fetchCurrentHoldings={this.props.fetchCurrentHoldings} fetchPrices={this.props.fetchPrices}/>
+                
             </div>
         );
     }

@@ -30,14 +30,11 @@ export default class TickerTableTotalPriceRowComponent extends React.Component {
     render() {
         return (
             <tr>
-                <td> <DropdownButton className="manageButton" id="dropdown-basic-button" title="Undo Holdings Changes">
-                            <Dropdown.Item eventKey="last_change" onSelect={this.handleSelect}>Undo Last Change</Dropdown.Item>
-                            <Dropdown.Item eventKey="last_hour" onSelect={this.handleSelect}>Undo Last Hour</Dropdown.Item>
-                            <Dropdown.Item eventKey="today" onSelect={this.handleSelect}>Undo Today</Dropdown.Item>
-                        </DropdownButton></td>
                 <td> <ClearHoldingsButton items={this.props.items} fetchCurrentHoldings={this.props.fetchCurrentHoldings}/></td>
+                <td ></td>
+                <td ></td>
                 <td><b>Total Value:</b></td>
-                <td>{this.props.portfolioValue}</td>
+                <td>{parseFloat(this.props.portfolioValue).toFixed(2)}</td>
             </tr>
         );
     }

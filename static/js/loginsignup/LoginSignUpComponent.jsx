@@ -91,7 +91,7 @@ export default class LoginSignUpComponent extends React.Component {
                             Welcome to Brownian
                         </h1>
                         <Form>
-                            <Form.Group controlId="formBasicEmail">
+                            <Form.Group controlId="main">
                                 <Form.Label>Username or Email address</Form.Label>
                                 <Form.Control type="email" placeholder="Email" value={this.state.username} onChange={this.handleChangeUsername} />
                                 <Form.Text className="text-muted">

@@ -1,8 +1,18 @@
 .flexContainer{
     display:flex;
-    flex-direction: row;
     justify-content: space-evenly;
 
+}
+  
+@media only screen and (max-width: 1300px) {
+    .widthSensitive{
+        flex-direction: column;
+    }
+}
+@media only screen and (min-width: 1301px) {
+    .widthSensitive{
+        flex-direction: row;
+    }
 }
 
 .statTable__header{
@@ -10,16 +20,46 @@
     color: White;
 }
 
+.visualizeStocks{
+    display: flex;
+    justify-content: center;
+}
+.updateForm{
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-evenly;
+    margin-bottom: 20px;
+}
+.updateForm__group{
+    margin-bottom: 0px;
+}
+.updateForm__label{
+    margin-left: 5px;
+    margin-bottom: 2px;
+}
 
-.manageButton,
-.manageButton button,
-.manageButton:active,
-.manageButton button:active,
-.manageButton:active:hover,
-.manageButton:hover,
-.manageButton button:active:hover,
-.manageButton button:hover {
-    border-color: #827070;
+.manage__header{
+    text-align: center;
+}
+
+.manageButton{
+    border-color: white;
     background-color: #827070;
+    color: white;
+}
+.manageButton:hover{
+    border-color: white;
+    background-color: #5b4c4c;
+    color: white;
+}
+
+.manageButtonDiv button{
+    border-color: white;
+    background-color: #827070;
+    color: white;
+}
+.manageButtonDiv button:hover{
+    border-color: white;
+    background-color: #5b4c4c;
     color: white;
 }

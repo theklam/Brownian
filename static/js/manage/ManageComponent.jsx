@@ -17,16 +17,18 @@ export default class ManageComponent extends React.Component {
 
     render() {
         return (
-            <div className="flexContainer">
+            <div className="flexContainer widthSensitive">
                 <div>
-                    <h2>Your Portfolio</h2>
-                    <PortfolioRisk items={this.props.items}/>
+                    <h2 className='manage__header'>Your Portfolio</h2>
+                    
                     <VisualizeStocks items={this.props.items} div_title="portfolio"/>
-                    <TickerTable items={this.props.items} portfolioValue={this.props.portfolioValue} fetchCurrentHoldings={this.props.fetchCurrentHoldings} fetchPrices={this.props.fetchPrices}/>
+                    <PortfolioRisk items={this.props.items}/>
                     <UpdateTickerTableForm fetchCurrentHoldings={this.props.fetchCurrentHoldings} items={this.props.items} fetchPrices={this.props.fetchPrices}/>
+                    <TickerTable items={this.props.items} portfolioValue={this.props.portfolioValue} fetchCurrentHoldings={this.props.fetchCurrentHoldings} fetchPrices={this.props.fetchPrices}/>
+                    
                 </div>
                 <div>
-                    <h2>Optimization Tool</h2>
+                    <h2 className='manage__header'>Optimization Tool</h2>
                     <PortfolioOptimization fetchCurrentHoldings= {this.props.fetchCurrentHoldings} items={this.props.items} portfolioValue={this.props.portfolioValue} fetchPrices={this.props.fetchPrices}/>
                 </div>
                 
