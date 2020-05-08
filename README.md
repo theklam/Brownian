@@ -1,5 +1,4 @@
-# simple-flask-react-template
-# An application template in Python, Flask and ReactJS.
+# Brownian
 
 ## Main Technologies:
 * Python
@@ -10,11 +9,15 @@
 * NPM
 * webpack
 * CSS
-* Docker
+* HTML
+* D3
+* sqlite
 
 ## Building the application:
 
-Option 1: python server  
+1) create virtual environment: 
+
+
 1) use pip to install the requirements of the server:  
 $ pip install -r requirements.txt  
 Obs.: I highly recommend to use a virtual env to avoid dependency conflicts.
