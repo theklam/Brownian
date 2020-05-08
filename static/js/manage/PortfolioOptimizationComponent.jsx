@@ -49,6 +49,8 @@ export default class PortfolioOptimizationComponent extends React.Component {
             .then(response => response.json())
             .then(response => {
                 let optimized_json = JSON.parse(response['new_holdings']);
+                console.log('optimized weights')
+                console.log(optimized_json)
                 this.setState({
                     optimizedReturns: response["optimized_returns"],
                     optimizedVol: response["optimized_vol"],
@@ -100,6 +102,8 @@ export default class PortfolioOptimizationComponent extends React.Component {
     render() {
         return (
             <div>
+                
+                <VisualizeStocks items={this.state.optimizedItems} div_title="optimized"/>
                 <Table striped bordered hover>
                 <thead>
                     <tr className="statTable__header">
@@ -122,7 +126,6 @@ export default class PortfolioOptimizationComponent extends React.Component {
                     </tr>
                 </tbody>
                 </Table>
-                <VisualizeStocks items={this.state.optimizedItems} div_title="optimized"/>
                 <Form >
                     <Form.Row className = 'updateForm'>
                         <Form.Group controlId="minWeightField" className='updateForm__group'>

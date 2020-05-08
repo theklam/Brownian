@@ -49,6 +49,8 @@ export default class App extends React.Component {
       .then(
         (result) => {
           let items = Object.values(result);
+          console.log("items array:")
+          console.log(items)
           this.setState({
             isLoaded: true,
             items: items

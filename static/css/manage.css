@@ -28,7 +28,7 @@
     display: flex;
     align-items: flex-end;
     justify-content: space-evenly;
-    margin-bottom: 5px;
+    margin-bottom: 20px;
 }
 .updateForm__group{
     margin-bottom: 0px;

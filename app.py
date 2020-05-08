@@ -275,7 +275,8 @@ def holdings():
                 ''',db.engine, params={'user_id': user_id})
             
                 portfolio = user_portfolio[user_portfolio['quantity'] > 0.000001]
-                portfolio = portfolio.round(2)
+                portfolio['weights'] = portfolio['total_value']/portfolio['total_value'].sum()
+                portfolio = portfolio.round({'quantity': 2, 'price':2, 'total_value' : 2, 'weights':4})
                 return portfolio.to_json(orient='index')
         else:
             print('user_id is none here!')
@@ -381,7 +382,8 @@ def optimzizePortfolio():
             new_holding = new_holding.merge(price_map)
             new_holding = new_holding[new_holding['quantity'] > 0.000001]
             new_holding['total_value'] = new_holding['quantity']*new_holding['price']
-            new_holding = new_holding.round(2)
+            new_holding['weights'] = new_holding['total_value']/new_holding['total_value'].sum()
+            new_holding = new_holding.round({'quantity': 2, 'price':2, 'total_value' : 2, 'weights':4})
             return jsonify({"optimized_weights": optimized_weights.tolist(), "optimized_returns": optimized_returns,"optimized_vol": optimized_vol, "optimized_sharpe": optimized_sharpe, "new_holdings":new_holding.to_json(orient='index')})
         else:
             print('user_id is none here!')
