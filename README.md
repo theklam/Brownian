@@ -18,10 +18,10 @@ Stock portfolio analytics and visualization tool
 
 ## Building the application:
 
-1) create virtual environment (we use venv to avoid dependency conflicts): 
+1) create virtual environment (we use venv to avoid dependency conflicts):  
 ```$ virtualenv -p python3.7 venv```
 
-2) activate virtual environment:
+2) activate virtual environment:  
 ```$ source venv/bin/activate```
 
 3) use pip to install the requirements of the server:  
