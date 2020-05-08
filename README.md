@@ -16,7 +16,7 @@
 ## Building the application:
 
 1) create virtual environment: 
-
+```$ virtualenv -p python3.7 venv```
 
 1) use pip to install the requirements of the server:  
 $ pip install -r requirements.txt  
