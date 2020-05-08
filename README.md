@@ -41,9 +41,9 @@ $ npm i react react-dom --save-dev```
 ```$ npm run watch```  
 
 6) change to main directory:  
-$ cd ..
+```$ cd ..```
 
 7) run the server:  
-$ python app.py
+```$ python app.py```
 
-7) access via browser http://0.0.0.0/ and you are good to go :)
+7) access via browser ```http://0.0.0.0/``` and you are good to go :)
