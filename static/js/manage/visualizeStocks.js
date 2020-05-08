@@ -4,6 +4,8 @@ var arc;
 var svg;
 var outerArc;
 var radius;
+var color;
+var tickers;
 
 function arcTween(a) {
     var i = d3.interpolate(this._current, a);
@@ -33,7 +35,7 @@ const update = (data) => {
 
     var allSlices = newSlices.merge(existingSlices);
     allSlices.attr('d', arc)
-        // .attr('fill', function (d) { return (color(d.data.ticker)) })
+        .attr('fill', function (d) { return (color(d.data.ticker)) })
         .attr("stroke", "white")
         .style("stroke-width", "2px")
         .style("opacity", 0.7)
@@ -114,13 +116,11 @@ const draw = (data, div_title) => {
         .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
     // groups should be: ['AAPL', 'TSLA', ...]
-    // let tickers = data.map(function (d) { return d.ticker });
-    // console.log(tickers);
+    tickers = data.map(function (d) { return d.ticker });
+    console.log(tickers);
 
     // set the color scale
-    // var color = d3.scaleOrdinal()
-    //     .domain(tickers)
-    //     .range(d3.schemeDark2);
+    color = d3.scaleOrdinal(d3.schemeCategory10);
 
     // Compute the position of each group on the pie:
     var pie = d3.pie()
@@ -149,7 +149,7 @@ const draw = (data, div_title) => {
         .enter()
         .append('path')
         .attr('d', arc)
-        // .attr('fill', function (d) { return (color(d.data.ticker)) })
+        .attr('fill', function (d) { return (color(d.data.ticker)) })
         .attr("stroke", "white")
         .style("stroke-width", "2px")
         .style("opacity", 0.7)
