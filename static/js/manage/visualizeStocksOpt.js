@@ -1,20 +1,20 @@
 import * as d3 from 'd3';
 
-var arc;
-var svg;
-var outerArc;
-var radius;
+var arc1;
+var svg1;
+var outerArc1;
+var radius1;
 var color;
 
 function arcTween(a) {
     var i = d3.interpolate(this._current, a);
     this._current = i(0);
     return function (t) {
-        return arc(i(t));
+        return arc1(i(t));
     };
 }
 
-const update = (data) => {
+const updateOpt = (data) => {
     console.log('im updating properly!');
     var pie = d3.pie()
         .sort(null) // Do not sort group by size
@@ -24,7 +24,7 @@ const update = (data) => {
     console.log(data_ready);
 
     // this represents the existing slices
-    var existingSlices = svg.selectAll('path')
+    var existingSlices = svg1.selectAll('path')
         .data(data_ready, function (d) { return d.data.ticker; });
 
     existingSlices.transition().duration(500).attrTween("d", arcTween); // Smooth transition with arcTween
@@ -33,7 +33,7 @@ const update = (data) => {
         .append('path');
 
     var allSlices = newSlices.merge(existingSlices);
-    allSlices.attr('d', arc)
+    allSlices.attr('d', arc1)
         .attr('fill', function (d) { return (color(d.data.ticker)) })
         .attr("stroke", "white")
         .style("stroke-width", "2px")
@@ -44,7 +44,7 @@ const update = (data) => {
     // ~~~~~~~~~~~~~~~~~~~~~~~ Part 2: polyline ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // this represents the existing slices
-    var existingSlices2 = svg.selectAll('polyline')
+    var existingSlices2 = svg1.selectAll('polyline')
         .data(data_ready, function (d) { return d.data.ticker; });
 
     existingSlices2.transition().duration(500); // Smooth transition with arcTween
@@ -57,11 +57,11 @@ const update = (data) => {
         .style("fill", "none")
         .attr("stroke-width", 1)
         .attr('points', function (d) {
-            var posA = arc.centroid(d) // line insertion in the slice
-            var posB = outerArc.centroid(d) // line break: we use the other arc generator that has been built only for that
-            var posC = outerArc.centroid(d); // Label position = almost the same as posB
+            var posA = arc1.centroid(d) // line insertion in the slice
+            var posB = outerArc1.centroid(d) // line break: we use the other arc generator that has been built only for that
+            var posC = outerArc1.centroid(d); // Label position = almost the same as posB
             var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2 // we need the angle to see if the X position will be at the extreme right or extreme left
-            posC[0] = radius * 0.95 * (midangle < Math.PI ? 1 : -1); // multiply by 1 or -1 to put it on the right or on the left
+            posC[0] = radius1 * 0.95 * (midangle < Math.PI ? 1 : -1); // multiply by 1 or -1 to put it on the right or on the left
             return [posA, posB, posC]
         })
 
@@ -70,7 +70,7 @@ const update = (data) => {
     // ~~~~~~~~~~~~~~~~~~~~~~~ Part 3: text ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // this represents the existing slices
-    var existingSlices3 = svg.selectAll('text')
+    var existingSlices3 = svg1.selectAll('text')
         .data(data_ready, function (d) { return d.data.ticker; });
 
     existingSlices3.transition().duration(500); // Smooth transition with arcTween
@@ -81,9 +81,9 @@ const update = (data) => {
     var allSlices3 = newSlices3.merge(existingSlices3);
     allSlices3.text(function (d) { console.log(d.data.ticker); return d.data.ticker })
         .attr('transform', function (d) {
-            var pos = outerArc.centroid(d);
+            var pos = outerArc1.centroid(d);
             var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
-            pos[0] = radius * 0.99 * (midangle < Math.PI ? 1 : -1);
+            pos[0] = radius1 * 0.99 * (midangle < Math.PI ? 1 : -1);
             return 'translate(' + pos + ')';
         })
         .style('text-anchor', function (d) {
@@ -93,7 +93,7 @@ const update = (data) => {
     existingSlices3.exit().remove();
 }
 
-const draw = (data, div_title) => {
+const drawOpt = (data, div_title) => {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ don't touch ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     var divToSelect = "." + div_title;
     d3.select(divToSelect + " > *").remove();
@@ -105,9 +105,9 @@ const draw = (data, div_title) => {
     var margin = 40
 
     // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
-    radius = Math.min(width, height) / 2 - margin
+    radius1 = Math.min(width, height) / 2 - margin
 
-    svg = d3.select(divToSelect)
+    svg1 = d3.select(divToSelect)
         .append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -126,31 +126,31 @@ const draw = (data, div_title) => {
     console.log(data_ready);
 
     // The arc generator
-    arc = d3.arc()
-        .innerRadius(radius * 0.5)         // This is the size of the donut hole
-        .outerRadius(radius * 0.8)
+    arc1 = d3.arc()
+        .innerRadius(radius1 * 0.5)         // This is the size of the donut hole
+        .outerRadius(radius1 * 0.8)
 
     // Another arc that won't be drawn. Just for labels positioning
-    outerArc = d3.arc()
-        .innerRadius(radius * 0.9)
-        .outerRadius(radius * 0.9)
+    outerArc1 = d3.arc()
+        .innerRadius(radius1 * 0.9)
+        .outerRadius(radius1 * 0.9)
 
     // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-    svg
+    svg1
         .selectAll('path')
         .data(data_ready, function (d, i) {
             return d.data.ticker;
         })
         .enter()
         .append('path')
-        .attr('d', arc)
+        .attr('d', arc1)
         .attr('fill', function (d) { return (color(d.data.ticker)) })
         .attr("stroke", "white")
         .style("stroke-width", "2px")
         .style("opacity", 0.7)
 
     // Add the polylines between chart and labels:
-    svg
+    svg1
         .selectAll('polyline')
         .data(data_ready, function (d, i) {
             return d.data.ticker;
@@ -161,16 +161,16 @@ const draw = (data, div_title) => {
         .style("fill", "none")
         .attr("stroke-width", 1)
         .attr('points', function (d) {
-            var posA = arc.centroid(d) // line insertion in the slice
-            var posB = outerArc.centroid(d) // line break: we use the other arc generator that has been built only for that
-            var posC = outerArc.centroid(d); // Label position = almost the same as posB
+            var posA = arc1.centroid(d) // line insertion in the slice
+            var posB = outerArc1.centroid(d) // line break: we use the other arc generator that has been built only for that
+            var posC = outerArc1.centroid(d); // Label position = almost the same as posB
             var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2 // we need the angle to see if the X position will be at the extreme right or extreme left
             posC[0] = radius * 0.95 * (midangle < Math.PI ? 1 : -1); // multiply by 1 or -1 to put it on the right or on the left
             return [posA, posB, posC]
         })
 
     // Add the polylines between chart and labels:
-    svg
+    svg1
         .selectAll('text')
         .data(data_ready, function (d, i) {
             return d.data.ticker;
@@ -179,7 +179,7 @@ const draw = (data, div_title) => {
         .append('text')
         .text(function (d) { console.log(d.data.ticker); return d.data.ticker })
         .attr('transform', function (d) {
-            var pos = outerArc.centroid(d);
+            var pos = outerArc1.centroid(d);
             var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
             pos[0] = radius * 0.99 * (midangle < Math.PI ? 1 : -1);
             return 'translate(' + pos + ')';
@@ -190,4 +190,4 @@ const draw = (data, div_title) => {
         })
 
 }
-export { draw, update };
+export { drawOpt, updateOpt };
