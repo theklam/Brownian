@@ -12,21 +12,21 @@ const update = (data) => {
     console.log('new data ready is: ');
     console.log(data_ready);
 
-    svg
-        .selectAll('allSlices')
-        .data(data_ready)
-        .enter()
-        .append('path')
-        .attr('d', arc)
+    // this represents the existing slices
+    var existingSlices = svg.selectAll('path')
+        .data(data_ready, function (d) { return d.data.ticker; });
+
+    var newSlices = existingSlices.enter()
+        .append('path');
+
+    var allSlices = newSlices.merge(existingSlices);
+    allSlices.attr('d', arc)
         // .attr('fill', function (d) { return (color(d.data.ticker)) })
         .attr("stroke", "white")
         .style("stroke-width", "2px")
         .style("opacity", 0.7)
 
-    // var path = d3.select(divToSelect).selectAll("path").data(data_ready); // Compute the new angles
-    // console.log(arc);
-    // path.attr("d", arc); // redrawing the path
-    // d3.selectAll("text").data(pie).attr("transform", function (d) { return "translate(" + labelArc.centroid(d) + ")"; }); // recomputing the centroid and translating the text accordingly.
+    existingSlices.exit().remove();
 }
 
 const draw = (data, div_title) => {
@@ -79,8 +79,10 @@ const draw = (data, div_title) => {
 
     // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
     svg
-        .selectAll('allSlices')
-        .data(data_ready)
+        .selectAll('path')
+        .data(data_ready, function (d, i) {
+            return d.data.ticker;
+        })
         .enter()
         .append('path')
         .attr('d', arc)
