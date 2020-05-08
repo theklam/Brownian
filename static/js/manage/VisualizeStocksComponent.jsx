@@ -1,6 +1,6 @@
 import React from "react";
 import draw from './visualizeStocks.js'
-
+import '../../css/manage.css'
 
 /**
  * 
@@ -24,7 +24,7 @@ export default class VisualizeStocksComponent extends React.Component {
 
     render() {
         return (
-            <div className={this.props.div_title}></div>
+            <div className={`${this.props.div_title} visualizeStocks`}></div>
         );
     }
 }

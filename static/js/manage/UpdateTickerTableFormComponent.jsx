@@ -1,5 +1,6 @@
 import React from "react";
 import { Form, Col, Button } from 'react-bootstrap';
+import '../../css/manage.css'
 
 export default class UpdateTickerTableForm extends React.Component {
     constructor(props) {
@@ -48,16 +49,21 @@ export default class UpdateTickerTableForm extends React.Component {
     render() {
         return (
             <Form>
-                <Form.Row>
-                    <Col>
-                        <Form.Control placeholder="Ticker" onChange={this.handleChangeTicker} />
-                    </Col>
-                    <Col>
-                        <Form.Control placeholder="Quantity" onChange={this.handleChangeQuantity} />
-                    </Col>
-                    <Button className="manageButton" variant="primary" onClick={this.postNewStock}>
-                        Add Stonk
-                    </Button>
+                <Form.Row className = 'updateForm'>
+                    <Form.Group controlId="tickerField" className='updateForm__group'>
+                        <Form.Label className='updateForm__label text-muted'>Ticker</Form.Label>
+                        <Form.Control type='text' placeholder="e.g. GOOG" onChange={this.handleChangeTicker} />
+                    </Form.Group>
+                    <Form.Group controlId="quantityField" className='updateForm__group'>
+                        <Form.Label className='updateForm__label text-muted'>Quantity</Form.Label>
+                        <Form.Control type='text' placeholder="e.g. 2" onChange={this.handleChangeQuantity} />
+                    </Form.Group>
+                    <div>
+                        <Button className="manageButton" variant="primary" onClick={this.postNewStock}>
+                            Add Stonk
+                        </Button>
+                    </div>
+                    
                 </Form.Row>
             </Form>
         );
