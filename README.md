@@ -15,6 +15,7 @@ Stock portfolio analytics and visualization tool
 * HTML
 * D3
 * sqlite
+* React Router
 
 ## Building the application:
 
