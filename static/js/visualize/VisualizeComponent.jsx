@@ -80,14 +80,20 @@ export default class VisualizeComponent extends React.Component {
             )
     }
 
-    componentDidMount() {
-        this.fetchCurrentPortfolio()
-            .then(() => console.log('test post pull'))
-            .then(() => draw(this.state.portfolioViz, 'Your Portfolio'));
+    getYAxisMax() {
+        const combined = this.state.portfolioViz.concat(this.state.benchmarkViz);
+        return Math.max(...combined);
+    }
 
-        this.fetchCurrentBenchmark()
-            .then(() => console.log('test post pull'))
-            .then(() => draw(this.state.benchmarkViz, 'Benchmark (S+P 500)'));
+    componentDidMount() {
+        Promise.all([
+            this.fetchCurrentBenchmark(),
+            this.fetchCurrentPortfolio()
+        ]).then(allResponses => {
+            const yAxisMax = this.getYAxisMax();
+            draw(this.state.portfolioViz, 'Your Portfolio', yAxisMax);
+            draw(this.state.benchmarkViz, 'Benchmark (S+P 500)', yAxisMax);
+        })
     }
 
     render() {
