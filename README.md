@@ -1,7 +1,7 @@
 # Brownian
 
 ## About:
-Stock portfolio analytics and visualization tool
+Brownian allows users to manage a theoretical portfolio before risking real money. It also allows users who already have a real portfolio to manage it more effectively by presenting detailed analytics about their portfolio’s past and projected performances.
 
 ## Main Technologies:
 * Python
