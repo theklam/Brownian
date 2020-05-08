@@ -24,7 +24,6 @@ export default class App extends React.Component {
       portfolioValue: 0
 
     };
-    // window.localStorage.setItem('userID', '');
     this.fetchCurrentHoldings = this.fetchCurrentHoldings.bind(this);
     this.fetchPrices = this.fetchPrices.bind(this);
     this.getPortfolioValue = this.getPortfolioValue.bind(this);
