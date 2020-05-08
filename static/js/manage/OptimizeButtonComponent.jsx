@@ -16,9 +16,12 @@ export default class OptimizeButton extends React.Component {
 
     render() {
         return (
-            <Button className="manageButton" variant="primary" onClick={this.handleClick}>
-                Update Portfolio
-            </Button>
+            <div>
+                <Button className="manageButton" variant="primary" onClick={this.handleClick}>
+                    Update Portfolio
+                </Button>
+            </div>
+            
         );
     }
 }

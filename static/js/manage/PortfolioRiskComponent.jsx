@@ -59,7 +59,7 @@ export default class PortfolioRiskButton extends React.Component {
                     </tr>
                     <tr>
                         <td>Sharpe Ratio</td>
-                        <td>{this.state.historicalSharpe}</td>
+                        <td>{parseFloat(this.state.historicalSharpe).toFixed(3)}</td>
                     </tr>
                 </tbody>
             </Table>

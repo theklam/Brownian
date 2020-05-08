@@ -274,7 +274,8 @@ def holdings():
                 WHERE recent_hold.ticker = latest_prices.ticker;
                 ''',db.engine, params={'user_id': user_id})
             
-                portfolio = user_portfolio[user_portfolio['quantity'] > 0]
+                portfolio = user_portfolio[user_portfolio['quantity'] > 0.000001]
+                portfolio = portfolio.round(2)
                 return portfolio.to_json(orient='index')
         else:
             print('user_id is none here!')
@@ -378,7 +379,9 @@ def optimzizePortfolio():
             new_holding.drop(columns=['user_id','time'], inplace=True)
             price_map = pd.DataFrame({'ticker':stock_list, 'price':current_prices})
             new_holding = new_holding.merge(price_map)
+            new_holding = new_holding[new_holding['quantity'] > 0.000001]
             new_holding['total_value'] = new_holding['quantity']*new_holding['price']
+            new_holding = new_holding.round(2)
             return jsonify({"optimized_weights": optimized_weights.tolist(), "optimized_returns": optimized_returns,"optimized_vol": optimized_vol, "optimized_sharpe": optimized_sharpe, "new_holdings":new_holding.to_json(orient='index')})
         else:
             print('user_id is none here!')
