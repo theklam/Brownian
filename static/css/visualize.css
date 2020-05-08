@@ -1,5 +1,13 @@
 /* Style the lines by removing the fill and applying a stroke */
 
+.visualize__table__header{
+  background-color: #827070;
+  color: White;
+}
+.visualize__heading{
+  text-align: center;
+}
+
 .line {
   fill: none;
   stroke: #ffab00;

@@ -104,8 +104,7 @@ const draw = (props, title, yAxisMax) => {
         .attr("x", (width / 2))
         .attr("y", 0 - (margin.top / 2))
         .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .style("text-decoration", "underline")
+        .style("font-size", "24px")
         .text(title);
 }
 export default draw
