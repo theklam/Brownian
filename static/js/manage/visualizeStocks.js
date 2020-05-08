@@ -3,6 +3,14 @@ import * as d3 from 'd3';
 var arc;
 var svg;
 
+function arcTween(a) {
+    var i = d3.interpolate(this._current, a);
+    this._current = i(0);
+    return function (t) {
+        return arc(i(t));
+    };
+}
+
 const update = (data) => {
     console.log('im updating properly!');
     var pie = d3.pie()
@@ -15,6 +23,8 @@ const update = (data) => {
     // this represents the existing slices
     var existingSlices = svg.selectAll('path')
         .data(data_ready, function (d) { return d.data.ticker; });
+
+    existingSlices.transition().duration(500).attrTween("d", arcTween); // Smooth transition with arcTween
 
     var newSlices = existingSlices.enter()
         .append('path');
