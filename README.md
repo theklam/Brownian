@@ -1,5 +1,8 @@
 # Brownian
 
+## About:
+Brownian allows users to manage a theoretical portfolio before risking real money. It also allows users who already have a real portfolio to manage it more effectively by presenting detailed analytics about their portfolio’s past and projected performances.
+
 ## Main Technologies:
 * Python
 * pip
@@ -12,45 +15,36 @@
 * HTML
 * D3
 * sqlite
+* React Router
 
 ## Building the application:
 
-1) create virtual environment: 
+1) create virtual environment (we use venv to avoid dependency conflicts):  
+```$ virtualenv -p python3.7 venv```
 
+2) activate virtual environment:  
+```$ source venv/bin/activate```
 
-1) use pip to install the requirements of the server:  
-$ pip install -r requirements.txt  
-Obs.: I highly recommend to use a virtual env to avoid dependency conflicts.
+3) use pip to install the requirements of the server:  
+```$ pip install -r requirements.txt```
 
-2) change directory to static folder:  
-$ cd static
+4) change directory to static folder:  
+```$ cd static```
 
-3) install front end dependencies:  
-$ npm install  
-(dev-only):  
-$ npm i webpack --save-dev  
-$ npm i babel-core babel-loader babel-preset-es2015 babel-preset-react --save-dev  
-$ npm i react react-dom --save-dev
+5) install front end dependencies:  
+```$ npm install```
 
-4) build the front end:  
-$ npm run build  
-Obs.: You can use 'npm run watch' to avoid building the front end everytime a change is made.
+5) build the front end (we use 'npm run watch' to avoid building the front end everytime a change is made):  
+```$ npm run watch```  
 
-5) change to main directory:  
-$ cd ..
+6) change to main directory:  
+```$ cd ..```
 
-6) run the server:  
-$ python server.py
+7) run the server:  
+```$ python app.py```
 
-7) access via browser http://localhost:5000 and you are good to go :)
+7) access via browser ```http://0.0.0.0/``` and you are good to go :)
 
+## Note about Visualize Page
 
-Option 2: Docker  
-1) build the application:  
-$ docker-compose build
-
-2) run the server:  
-$ docker-compose up
-
-3) access via browser http://localhost:5000 and you are good to go :)
-
+The visualize page graphs use your portfolio value 1 month ago as its first data point, so if you create a new account you will not see your portfolio's monthly performance (as it did not exist until you created the account). If you want to see an example of the feature you can log in with username: bryan password: xian
