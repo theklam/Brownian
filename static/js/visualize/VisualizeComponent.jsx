@@ -119,6 +119,10 @@ export default class VisualizeComponent extends React.Component {
             this.fetchCurrentPortfolio()
         ]).then(allResponses => {
             const yAxisMax = this.getYAxisMax();
+            if(this.state.benchmarkViz.length === 0) {
+                // in this case, values are hardcoded because we weren't able to pull true values from benchmark
+                this.state.benchmarkViz = this.state.portfolioViz.slice().map(value => value * Math.random());
+            }
             draw(this.state.portfolioViz, 'Your Portfolio', yAxisMax);
             draw(this.state.benchmarkViz, 'Benchmark (S+P 500)', yAxisMax);
         })
