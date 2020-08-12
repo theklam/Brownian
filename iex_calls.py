@@ -13,7 +13,8 @@ example_dict = {'aapl': 3, 'agg':4, 'dis':2}
 def setup_api_variables(testing):
     if testing:
         os.environ['IEX_API_VERSION'] = 'iexcloud-sandbox'
-        os.environ['IEX_TOKEN'] = 'Tpk_dc5c4e7b22334c0298338528c39baf6c'
+        # Testing token updated 8/12 by Kalvin
+        os.environ['IEX_TOKEN'] = 'Tpk_a8b220ebdbf3492993cd3f2e95a97c6d'
     else:
         os.environ['IEX_API_VERSION'] = 'v1'
         os.environ['IEX_TOKEN'] = 'pk_9e98dc3f12194817b7df4c4e7e84159d'
